@@ -26,7 +26,7 @@ type kerbSession struct {
 	Config *kconfig.Config
 }
 
-func NewKerbSession(domain string, domainController string) kerbSession {
+func NewKerbruteSession(domain string, domainController string) kerbSession {
 	configstring := buildKrb5Template(strings.ToUpper(domain), domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
 	if err != nil {
@@ -67,8 +67,6 @@ func (k kerbSession) testLogin(username, password string) bool {
 	if err != nil {
 		// fmt.Printf("error logging in: %v", err)
 		return false
-	} else {
-		// fmt.Println("success!")
-		return true
 	}
+	return true
 }
