@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 	"strings"
 
 	kclient "gopkg.in/jcmturner/gokrb5.v7/client"
@@ -57,16 +58,21 @@ func buildKrb5Template(domain, domainController string) string {
 	return builder.String()
 }
 
-func (k kerbruteSession) testLogin(username, password string) bool {
-	if username == "" {
-		return false
-	}
+func (k kerbruteSession) testLogin(username, password string) (bool, error) {
 	Client := kclient.NewClientWithPassword(username, strings.ToUpper(k.Domain), password, k.Config, kclient.DisablePAFXFAST(true))
 	defer Client.Destroy()
+	if ok, err := Client.IsConfigured(); !ok {
+		return false, err
+	}
+
 	err := Client.Login()
 	if err != nil {
 		// fmt.Printf("error logging in: %v", err)
-		return false
+		return false, err
 	}
-	return true
+	return true, nil
+}
+
+func (k kerbruteSession) handleKerbError(err error) {
+	log.Printf("[!] Error: %v", err.Error())
 }

@@ -47,8 +47,10 @@ func main() {
 	var username string
 	for scanner.Scan() {
 		username = scanner.Text()
-		if kSession.testLogin(username, opts.Args.Password) {
+		if ok, err := kSession.testLogin(username, opts.Args.Password); ok {
 			log.Printf("[!] Valid Login: \t%v : %v", username, opts.Args.Password)
+		} else {
+			kSession.handleKerbError(err)
 		}
 	}
 	log.Println("...done!")
