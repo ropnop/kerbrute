@@ -29,7 +29,7 @@ func main() {
 	}
 	domain := opts.Domain
 	domainController := opts.DomainController
-	kSession := NewKerbSession(domain, domainController)
+	kSession := NewKerbruteSession(domain, domainController)
 	log.Println("Using KDC(s):")
 	for _, v := range kSession.Kdcs {
 		log.Printf("\t%s", v)

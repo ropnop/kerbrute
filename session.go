@@ -20,20 +20,20 @@ const krb5ConfigTemplateKDC = `[realms]
 }
 `
 
-type kerbSession struct {
+type kerbruteSession struct {
 	Domain string
 	Kdcs   map[int]string
 	Config *kconfig.Config
 }
 
-func NewKerbruteSession(domain string, domainController string) kerbSession {
+func NewKerbruteSession(domain string, domainController string) kerbruteSession {
 	configstring := buildKrb5Template(strings.ToUpper(domain), domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
 	if err != nil {
 		panic(err)
 	}
 	_, kdcs, err := Config.GetKDCs(domain, false)
-	k := kerbSession{domain, kdcs, Config}
+	k := kerbruteSession{domain, kdcs, Config}
 	return k
 
 }
@@ -57,7 +57,7 @@ func buildKrb5Template(domain, domainController string) string {
 	return builder.String()
 }
 
-func (k kerbSession) testLogin(username, password string) bool {
+func (k kerbruteSession) testLogin(username, password string) bool {
 	if username == "" {
 		return false
 	}
