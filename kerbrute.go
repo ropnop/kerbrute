@@ -1,25 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
-	"net"
 	"os"
-	"strings"
-	"text/template"
 
 	"github.com/jessevdk/go-flags"
-	kconfig "gopkg.in/jcmturner/gokrb5.v7/config"
 )
-
-const krb5ConfigTemplate = `[libdefaults]
-dns_lookup_kdc = true
-default_realm = {{.Domain}}
-[realms]
-{{.Domain}} = {
-	kdc = "{{.DomainController}}"
-	admin_server = {{.DomainController}}
-}`
 
 var opts struct {
 	Domain           string `short:"d" long:"domain" required:"true" name:"domain name" description:"Full name of domain (e.g. contoso.com). Required."`
@@ -28,46 +16,6 @@ var opts struct {
 		UsernameList string `positional-arg-name:"<username_list>"`
 		Password     string `positional-arg-name:"<password_to_try>"`
 	} `positional-args:"yes" required:"yes"`
-}
-
-func buildKrb5Config(domain, domainController string) string {
-	data := map[string]interface{}{
-		"Domain":           domain,
-		"DomainController": domainController,
-	}
-	t := template.Must(template.New("krb5ConfigString").Parse(krb5ConfigTemplate))
-	builder := &strings.Builder{}
-	if err := t.Execute(builder, data); err != nil {
-		panic(err)
-	}
-	return builder.String()
-}
-
-func lookUpKDC(domain string) string {
-	_, srvs, err := net.LookupSRV("kerberos", "udp", domain)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-	if len(srvs) == 0 {
-		return ""
-	}
-	return srvs[0].Target
-
-}
-
-func testKDC(configstring string) {
-	// fmt.Println(configstring)
-	Config, err := kconfig.NewConfigFromString(configstring)
-	if err != nil {
-		panic(err)
-	}
-	_, kdcs, err := Config.GetKDCs("", false)
-	fmt.Println("testing kdc")
-	for _, kdc := range kdcs {
-		fmt.Println(kdc)
-	}
-	return
 }
 
 func main() {
@@ -79,33 +27,34 @@ func main() {
 		}
 		os.Exit(1)
 	}
+	domain := opts.Domain
 	domainController := opts.DomainController
-	if opts.DomainController == "" {
-		log.Println("[!] No KDC provided. Attempting to find via DNS...")
-		domainController = lookUpKDC(opts.Domain)
-		if domainController == "" {
-			log.Fatal(fmt.Sprintf("[!] Couldn't find KDC for domain %q. Try specifing manually\n", opts.Domain))
-		}
+	kSession := NewKerbSession(domain, domainController)
+	log.Println("Using KDC(s):")
+	for _, v := range kSession.Kdcs {
+		log.Printf("\t%s", v)
 	}
 
-	log.Printf("[+] Using KDC: %v\n", domainController)
+	kSession.testLogin("agreen", "foobar")
 
-	kconfig := buildKrb5Config(opts.Domain, domainController)
-	testKDC(kconfig)
+	file, err := os.Open(opts.Args.UsernameList)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
-	// file, err := os.Open(opts.Args.UsernameList)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var username string
+	for scanner.Scan() {
+		username = scanner.Text()
+		if kSession.testLogin(username, opts.Args.Password) {
+			log.Printf("[!] Valid Login: \t%v : %v", username, opts.Args.Password)
+		}
+	}
+	log.Println("...done!")
 
-	// scanner := bufio.NewScanner(file)
-	// for scanner.Scan() {
-	// 	log.Println("Line: ", scanner.Text())
-	// }
-
-	// if err := scanner.Err(); err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 
 }
