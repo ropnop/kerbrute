@@ -1,6 +1,7 @@
-package main
+package session
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"strings"
@@ -11,20 +12,23 @@ import (
 
 const krb5ConfigTemplateDNS = `[libdefaults]
 dns_lookup_kdc = true
-default_realm = "{{.Domain}}"
+default_realm = {{.Domain}}
 `
 
-const krb5ConfigTemplateKDC = `[realms]
+const krb5ConfigTemplateKDC = `[libdefaults]
+default_realm = {{.Domain}}
+[realms]
 {{.Domain}} = {
-	kdc = "{{.DomainController}}"
-	admin_server = "{{.DomainController}}"
+	kdc = {{.DomainController}}
+	admin_server = {{.DomainController}}
 }
 `
 
 type kerbruteSession struct {
-	Domain string
-	Kdcs   map[int]string
-	Config *kconfig.Config
+	Domain       string
+	Kdcs         map[int]string
+	ConfigString string
+	Config       *kconfig.Config
 }
 
 func NewKerbruteSession(domain string, domainController string) kerbruteSession {
@@ -34,7 +38,10 @@ func NewKerbruteSession(domain string, domainController string) kerbruteSession 
 		panic(err)
 	}
 	_, kdcs, err := Config.GetKDCs(domain, false)
-	k := kerbruteSession{domain, kdcs, Config}
+	if err != nil {
+		fmt.Println(err)
+	}
+	k := kerbruteSession{domain, kdcs, configstring, Config}
 	return k
 
 }
@@ -58,7 +65,7 @@ func buildKrb5Template(domain, domainController string) string {
 	return builder.String()
 }
 
-func (k kerbruteSession) testLogin(username, password string) (bool, error) {
+func (k kerbruteSession) TestLogin(username, password string) (bool, error) {
 	Client := kclient.NewClientWithPassword(username, strings.ToUpper(k.Domain), password, k.Config, kclient.DisablePAFXFAST(true))
 	defer Client.Destroy()
 	if ok, err := Client.IsConfigured(); !ok {
@@ -73,6 +80,6 @@ func (k kerbruteSession) testLogin(username, password string) (bool, error) {
 	return true, nil
 }
 
-func (k kerbruteSession) handleKerbError(err error) {
+func (k kerbruteSession) HandleKerbError(err error) {
 	log.Printf("[!] Error: %v", err.Error())
 }

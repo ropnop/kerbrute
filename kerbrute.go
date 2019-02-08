@@ -1,3 +1,4 @@
+// +build ignore
 package main
 
 import (
@@ -7,6 +8,7 @@ import (
 	"os"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/ropnop/kerbrute/session"
 )
 
 var opts struct {
@@ -29,13 +31,11 @@ func main() {
 	}
 	domain := opts.Domain
 	domainController := opts.DomainController
-	kSession := NewKerbruteSession(domain, domainController)
+	kSession := session.NewKerbruteSession(domain, domainController)
 	log.Println("Using KDC(s):")
 	for _, v := range kSession.Kdcs {
 		log.Printf("\t%s", v)
 	}
-
-	kSession.testLogin("agreen", "foobar")
 
 	file, err := os.Open(opts.Args.UsernameList)
 	if err != nil {
@@ -47,10 +47,10 @@ func main() {
 	var username string
 	for scanner.Scan() {
 		username = scanner.Text()
-		if ok, err := kSession.testLogin(username, opts.Args.Password); ok {
+		if ok, err := kSession.TestLogin(username, opts.Args.Password); ok {
 			log.Printf("[!] Valid Login: \t%v : %v", username, opts.Args.Password)
 		} else {
-			kSession.handleKerbError(err)
+			kSession.HandleKerbError(err)
 		}
 	}
 	log.Println("...done!")
