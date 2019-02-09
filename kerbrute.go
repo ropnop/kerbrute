@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jessevdk/go-flags"
 )
@@ -19,10 +20,12 @@ var opts struct {
 	} `positional-args:"yes" required:"yes"`
 }
 
-func handleKerbError(err error) {
-	if opts.Verbose {
-		log.Printf(err.Error())
+func handleKerbError(err error) (string, bool) {
+	eString := err.Error()
+	if strings.Contains(eString, "KDC_ERR_WRONG_REALM") {
+		return "[!] KDC ERROR - Wrong Realm. Try adjusting the domain? Aborting...", true
 	}
+	return fmt.Sprintf("\n %#v \n", err.Error()), false
 }
 
 func main() {
@@ -47,20 +50,23 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	log.Printf("Testing usernames from %q", file.Name())
 
 	scanner := bufio.NewScanner(file)
 	var username string
 	for scanner.Scan() {
 		username = scanner.Text()
 		if opts.Verbose {
-			log.Printf("Testing Login: \t%v@%v : %v", username, domain, opts.Args.Password)
+			log.Printf("Testing Login: \"%v@%v\" : %q", username, domain, opts.Args.Password)
 		}
 
 		if ok, err := kSession.testLogin(username, opts.Args.Password); ok {
 			log.Printf("[+] Sucess! \t%v@%v : %v", username, domain, opts.Args.Password)
 		} else {
-			handleKerbError(err)
+			msg, abort := handleKerbError(err)
+			log.Println(msg)
+			if abort {
+				return
+			}
 		}
 	}
 	log.Println("...done!")

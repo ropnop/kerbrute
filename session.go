@@ -11,37 +11,41 @@ import (
 
 const krb5ConfigTemplateDNS = `[libdefaults]
 dns_lookup_kdc = true
-default_realm = "{{.Domain}}"
+default_realm = {{.Realm}}
 `
 
-const krb5ConfigTemplateKDC = `[realms]
-{{.Domain}} = {
-	kdc = "{{.DomainController}}"
-	admin_server = "{{.DomainController}}"
+const krb5ConfigTemplateKDC = `[libdefaults]
+default_realm = {{.Realm}}
+[realms]
+{{.Realm}} = {
+	kdc = {{.DomainController}}
+	admin_server = {{.DomainController}}
 }
 `
 
 type kerbruteSession struct {
 	Domain string
+	Realm  string
 	Kdcs   map[int]string
 	Config *kconfig.Config
 }
 
 func NewKerbruteSession(domain string, domainController string) kerbruteSession {
-	configstring := buildKrb5Template(strings.ToUpper(domain), domainController)
+	realm := strings.ToUpper(domain)
+	configstring := buildKrb5Template(realm, domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
 	if err != nil {
 		panic(err)
 	}
-	_, kdcs, err := Config.GetKDCs(domain, false)
-	k := kerbruteSession{domain, kdcs, Config}
+	_, kdcs, err := Config.GetKDCs(realm, false)
+	k := kerbruteSession{domain, realm, kdcs, Config}
 	return k
 
 }
 
-func buildKrb5Template(domain, domainController string) string {
+func buildKrb5Template(realm, domainController string) string {
 	data := map[string]interface{}{
-		"Domain":           domain,
+		"Realm":            realm,
 		"DomainController": domainController,
 	}
 	var kTemplate string
