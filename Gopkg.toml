@@ -25,10 +25,14 @@
 #   unused-packages = true
 
 
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.3"
+
+[[constraint]]
+  name = "gopkg.in/jcmturner/gokrb5.v7"
+  version = "7.1.0"
+
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/jessevdk/go-flags"
-  version = "1.4.0"

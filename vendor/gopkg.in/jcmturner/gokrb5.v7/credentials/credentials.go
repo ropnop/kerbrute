@@ -91,6 +91,7 @@ func NewFromPrincipalName(cname types.PrincipalName, realm string) *Credentials 
 // WithKeytab sets the Keytab in the Credentials struct.
 func (c *Credentials) WithKeytab(kt *keytab.Keytab) *Credentials {
 	c.keytab = kt
+	c.password = ""
 	return c
 }
 
@@ -110,6 +111,7 @@ func (c *Credentials) HasKeytab() bool {
 // WithPassword sets the password in the Credentials struct.
 func (c *Credentials) WithPassword(password string) *Credentials {
 	c.password = password
+	c.keytab = keytab.New() // clear any keytab
 	return c
 }
 
