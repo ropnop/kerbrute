@@ -76,20 +76,24 @@ func setPAData(cl *Client, krberr messages.KRBError, ASReq *messages.ASReq) erro
 		ASReq.PAData = append(ASReq.PAData, pa)
 	}
 	if cl.settings.AssumePreAuthentication() {
-		paTSb, err := types.GetPAEncTSEncAsnMarshalled()
-		if err != nil {
-			return krberror.Errorf(err, krberror.KRBMsgError, "error creating PAEncTSEnc for Pre-Authentication")
-		}
+		// Identify the etype to use to encrypt the PA Data
 		var et etype.EType
+		var err error
+		var key types.EncryptionKey
 		if krberr.ErrorCode == 0 {
-			etn := cl.settings.preAuthEType
+			// There is no KRB Error that tells us the etype to use
+			etn := cl.settings.preAuthEType // Use the etype that may have previously been negotiated
 			if etn == 0 {
-				etn = int32(cl.Config.LibDefaults.PreferredPreauthTypes[0])
+				etn = int32(cl.Config.LibDefaults.PreferredPreauthTypes[0]) // Resort to config
 			}
 			// This is not in response to an error from the KDC. It is preemptive or renewal
 			et, err = crypto.GetEtype(etn) // Take the first as preference
 			if err != nil {
 				return krberror.Errorf(err, krberror.EncryptingError, "error getting etype for pre-auth encryption")
+			}
+			key, err = cl.Key(et, nil)
+			if err != nil {
+				return krberror.Errorf(err, krberror.EncryptingError, "error getting key from credentials")
 			}
 		} else {
 			// Get the etype to use from the PA data in the KRBError e-data
@@ -97,11 +101,16 @@ func setPAData(cl *Client, krberr messages.KRBError, ASReq *messages.ASReq) erro
 			if err != nil {
 				return krberror.Errorf(err, krberror.EncryptingError, "error getting etype for pre-auth encryption")
 			}
-			cl.settings.preAuthEType = et.GetETypeID()
+			cl.settings.preAuthEType = et.GetETypeID() // Set the etype that has been defined for potential future use
+			key, err = cl.Key(et, &krberr)
+			if err != nil {
+				return krberror.Errorf(err, krberror.EncryptingError, "error getting key from credentials")
+			}
 		}
-		key, err := cl.Key(et, &krberr)
+		// Generate the
+		paTSb, err := types.GetPAEncTSEncAsnMarshalled()
 		if err != nil {
-			return krberror.Errorf(err, krberror.EncryptingError, "error getting key from credentials")
+			return krberror.Errorf(err, krberror.KRBMsgError, "error creating PAEncTSEnc for Pre-Authentication")
 		}
 		paEncTS, err := crypto.GetEncryptedData(paTSb, key, keyusage.AS_REQ_PA_ENC_TIMESTAMP, 1)
 		if err != nil {
@@ -114,6 +123,13 @@ func setPAData(cl *Client, krberr messages.KRBError, ASReq *messages.ASReq) erro
 		pa := types.PAData{
 			PADataType:  patype.PA_ENC_TIMESTAMP,
 			PADataValue: pb,
+		}
+		// Look for and delete any exiting patype.PA_ENC_TIMESTAMP
+		for i, pa := range ASReq.PAData {
+			if pa.PADataType == patype.PA_ENC_TIMESTAMP {
+				ASReq.PAData[i] = ASReq.PAData[len(ASReq.PAData)-1]
+				ASReq.PAData = ASReq.PAData[:len(ASReq.PAData)-1]
+			}
 		}
 		ASReq.PAData = append(ASReq.PAData, pa)
 	}
