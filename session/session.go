@@ -29,9 +29,10 @@ type kerbruteSession struct {
 	Kdcs         map[int]string
 	ConfigString string
 	Config       *kconfig.Config
+	Verbose      bool
 }
 
-func NewKerbruteSession(domain string, domainController string) kerbruteSession {
+func NewKerbruteSession(domain string, domainController string, verbose bool) kerbruteSession {
 	configstring := buildKrb5Template(strings.ToUpper(domain), domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
 	if err != nil {
@@ -41,7 +42,7 @@ func NewKerbruteSession(domain string, domainController string) kerbruteSession 
 	if err != nil {
 		fmt.Println(err)
 	}
-	k := kerbruteSession{domain, kdcs, configstring, Config}
+	k := kerbruteSession{domain, kdcs, configstring, Config, verbose}
 	return k
 
 }
