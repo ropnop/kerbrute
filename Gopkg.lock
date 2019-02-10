@@ -29,6 +29,14 @@
   revision = "2aebee971930cd0dd525873330952ab7df5ac95c"
 
 [[projects]]
+  digest = "1:5b3b29ce0e569f62935d9541dff2e16cc09df981ebde48e82259076a73a3d0c7"
+  name = "github.com/op/go-logging"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b2cb9fa56473e98db8caba80237377e83fe44db5"
+  version = "v1"
+
+[[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
   name = "github.com/spf13/cobra"
   packages = ["."]
@@ -124,6 +132,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/op/go-logging",
     "github.com/spf13/cobra",
     "gopkg.in/jcmturner/gokrb5.v7/client",
     "gopkg.in/jcmturner/gokrb5.v7/config",
