@@ -32,8 +32,13 @@ func setupSession(cmd *cobra.Command, args []string) {
 	Verbose, _ = cmd.Flags().GetBool("verbose")
 	Safe, _ = cmd.Flags().GetBool("safe")
 	KSession = session.NewKerbruteSession(Domain, DomainController, Verbose, Safe)
+
 	makeLogger(Verbose)
 
+	Log.Info("Using KDC(s):")
+	for _, v := range KSession.Kdcs {
+		Log.Infof("\t%s\n", v)
+	}
 }
 
 func makeLogger(verbose bool) {

