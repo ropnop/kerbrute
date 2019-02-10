@@ -102,7 +102,7 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 		if k.SafeMode {
 			return false, "USER LOCKED OUT and safe mode on! Aborting..."
 		}
-		return true, "User locked out"
+		return true, "USER LOCKED OUT"
 	}
 	return true, eString
 
