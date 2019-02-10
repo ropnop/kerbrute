@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ropnop/kerbrute/util"
+
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +37,7 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 
 	file, err := os.Open(usernamelist)
 	if err != nil {
-		Log.Error(err.Error())
+		logger.Log.Error(err.Error())
 		return
 	}
 	defer file.Close()
@@ -47,26 +49,31 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	start := time.Now()
 	for scanner.Scan() {
 		count++
-		username = scanner.Text()
-		login := fmt.Sprintf("%v@%v", username, Domain)
-		if ok, err := KSession.TestLogin(username, password); ok {
+		usernameline := scanner.Text()
+		username, err = util.FormatUsername(usernameline)
+		if err != nil {
+			logger.Log.Debugf("[!] %q - %v", usernameline, err.Error())
+			continue
+		}
+		login := fmt.Sprintf("%v@%v", username, domain)
+		if ok, err := kSession.TestLogin(username, password); ok {
 			success++
-			Log.Noticef("[+] VALID LOGIN:\t %s : %s", login, password)
+			logger.Log.Noticef("[+] VALID LOGIN:\t %s : %s", login, password)
 		} else {
 			// This is to determine if the error is "okay" or if we should abort everything
-			ok, errorString := KSession.HandleKerbError(err)
+			ok, errorString := kSession.HandleKerbError(err)
 			if !ok {
-				Log.Errorf("[!] %v - %v", login, errorString)
+				logger.Log.Errorf("[!] %v - %v", login, errorString)
 				return
 			}
-			Log.Debugf("[!] %v - %v", login, errorString)
+			logger.Log.Debugf("[!] %v - %v", login, errorString)
 		}
 	}
 
-	Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", count, success, time.Since(start).Seconds())
+	logger.Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", count, success, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
-		Log.Error(err.Error())
+		logger.Log.Error(err.Error())
 	}
 
 }
