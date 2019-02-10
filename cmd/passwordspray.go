@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ropnop/kerbrute/session"
 	"github.com/spf13/cobra"
 )
 
@@ -33,15 +32,9 @@ func init() {
 func passwordSpray(cmd *cobra.Command, args []string) {
 	usernamelist := args[0]
 	password := args[1]
-	domain, _ := cmd.Flags().GetString("domain")
-	domainController, _ := cmd.Flags().GetString("dc")
-	verbose, _ := cmd.Flags().GetBool("verbose")
-	safe, _ := cmd.Flags().GetBool("safe")
 
-	kSession := session.NewKerbruteSession(domain, domainController, verbose, safe)
-
-	log.Println("Using KDC(s):")
-	for _, v := range kSession.Kdcs {
+	Log.Debug("Using KDC(s):")
+	for _, v := range KSession.Kdcs {
 		log.Printf("\t%s\n", v)
 	}
 
@@ -59,15 +52,15 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	for scanner.Scan() {
 		count++
 		username = scanner.Text()
-		login := fmt.Sprintf("%v@%v", username, domain)
-		if ok, err := kSession.TestLogin(username, password); ok {
+		login := fmt.Sprintf("%v@%v", username, Domain)
+		if ok, err := KSession.TestLogin(username, password); ok {
 			log.Printf("[+] VALID LOGIN:\t %s : %s", login, password)
 		} else {
 			// This is to determine if the error is "okay" or if we should abort everything
-			if ok, errorString := kSession.HandleKerbError(err); !ok {
+			if ok, errorString := KSession.HandleKerbError(err); !ok {
 				log.Printf("[!] %v :\t %v", login, errorString)
 				return
-			} else if kSession.Verbose {
+			} else if KSession.Verbose {
 				log.Printf("[!] %v :\t %v", login, errorString)
 			}
 		}

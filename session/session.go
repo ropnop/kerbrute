@@ -23,7 +23,7 @@ default_realm = {{.Realm}}
 }
 `
 
-type kerbruteSession struct {
+type KerbruteSession struct {
 	Domain       string
 	Realm        string
 	Kdcs         map[int]string
@@ -33,7 +33,7 @@ type kerbruteSession struct {
 	SafeMode     bool
 }
 
-func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) kerbruteSession {
+func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) KerbruteSession {
 	realm := strings.ToUpper(domain)
 	configstring := buildKrb5Template(realm, domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
@@ -44,7 +44,7 @@ func NewKerbruteSession(domain string, domainController string, verbose bool, sa
 	if err != nil {
 		fmt.Println(err)
 	}
-	k := kerbruteSession{domain, realm, kdcs, configstring, Config, verbose, safemode}
+	k := KerbruteSession{domain, realm, kdcs, configstring, Config, verbose, safemode}
 	return k
 
 }
@@ -68,7 +68,7 @@ func buildKrb5Template(realm, domainController string) string {
 	return builder.String()
 }
 
-func (k kerbruteSession) TestLogin(username, password string) (bool, error) {
+func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 	Client := kclient.NewClientWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true))
 	defer Client.Destroy()
 	if ok, err := Client.IsConfigured(); !ok {
@@ -81,7 +81,7 @@ func (k kerbruteSession) TestLogin(username, password string) (bool, error) {
 	return true, nil
 }
 
-func (k kerbruteSession) HandleKerbError(err error) (bool, string) {
+func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	eString := err.Error()
 	if strings.Contains(eString, "Networking_Error: AS Exchange Error") {
 		return false, "NETWORK ERROR - Can't talk to KDC. Aborting..."

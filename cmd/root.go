@@ -4,12 +4,19 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/op/go-logging"
+	"github.com/ropnop/kerbrute/session"
 	"github.com/spf13/cobra"
 )
 
 var Domain string
 var DomainController string
 var Verbose bool
+var Safe bool
+
+var Log *logging.Logger
+
+var KSession session.KerbruteSession
 
 var rootCmd = &cobra.Command{
 	Use:   "kerbrute",
@@ -17,6 +24,31 @@ var rootCmd = &cobra.Command{
 	Long: `This tool is designed to assist in quickly bruteforcing valid Active Directory accounts through Kerberos Pre-Authentication.
 It is designed to be used on an internal Windows domain with access to one of the Domain Controllers.
 Warning: failed Kerberos Pre-Auth counts as a failed login and WILL lock out accounts`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("cobra run")
+	},
+	PersistentPreRun: setupSession,
+}
+
+func setupSession(cmd *cobra.Command, args []string) {
+	Domain, _ = cmd.Flags().GetString("domain")
+	DomainController, _ = cmd.Flags().GetString("dc")
+	Verbose, _ = cmd.Flags().GetBool("verbose")
+	Safe, _ = cmd.Flags().GetBool("safe")
+	KSession = session.NewKerbruteSession(Domain, DomainController, Verbose, Safe)
+
+	makeLogger()
+
+}
+
+func makeLogger() {
+	Log = logging.MustGetLogger("kerbrute")
+	format := logging.MustStringFormatter(
+		`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
+	)
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	backendFormatter := logging.NewBackendFormatter(backend, format)
+	logging.SetBackend(backendFormatter)
 }
 
 func Execute() {
