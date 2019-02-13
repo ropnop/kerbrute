@@ -27,6 +27,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&domainController, "dc", "", "The location of the Domain Controller (KDC) to target. If blank, will lookup via DNS")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log failures and errors")
 	rootCmd.PersistentFlags().BoolVar(&safe, "safe", false, "Safe mode. Will abort if any user comes back as locked out. Default: FALSE")
+	rootCmd.PersistentFlags().IntVarP(&threads, "threads", "t", 10, "Threads to use")
 
 	rootCmd.MarkFlagRequired("domainController")
 }

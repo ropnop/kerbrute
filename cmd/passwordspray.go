@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"os"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ropnop/kerbrute/util"
@@ -34,6 +35,13 @@ func init() {
 func passwordSpray(cmd *cobra.Command, args []string) {
 	usernamelist := args[0]
 	password := args[1]
+	stopOnSuccess = false
+
+	usersChan := make(chan string, threads)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	wg.Add(threads)
 
 	file, err := os.Open(usernamelist)
 	if err != nil {
@@ -42,38 +50,36 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	}
 	defer file.Close()
 
+	for i := 0; i < threads; i++ {
+		go makeSprayWorker(ctx, usersChan, &wg, password)
+	}
 	scanner := bufio.NewScanner(file)
 
-	var username string
-	count, success := 0, 0
 	start := time.Now()
+
+Scan:
 	for scanner.Scan() {
-		count++
-		usernameline := scanner.Text()
-		username, err = util.FormatUsername(usernameline)
-		if err != nil {
-			logger.Log.Debugf("[!] %q - %v", usernameline, err.Error())
-			continue
-		}
-		login := fmt.Sprintf("%v@%v", username, domain)
-		if ok, err := kSession.TestLogin(username, password); ok {
-			success++
-			logger.Log.Noticef("[+] VALID LOGIN:\t %s : %s", login, password)
-		} else {
-			// This is to determine if the error is "okay" or if we should abort everything
-			ok, errorString := kSession.HandleKerbError(err)
-			if !ok {
-				logger.Log.Errorf("[!] %v - %v", login, errorString)
-				return
+		select {
+		case <-ctx.Done():
+			break Scan
+		default:
+			usernameline := scanner.Text()
+			username, err := util.FormatUsername(usernameline)
+			if err != nil {
+				logger.Log.Debugf("[!] %q - %v", usernameline, err.Error())
+				continue
 			}
-			logger.Log.Debugf("[!] %v - %v", login, errorString)
+			usersChan <- username
 		}
 	}
+	close(usersChan)
+	wg.Wait()
 
-	logger.Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", count, success, time.Since(start).Seconds())
+	finalCount := atomic.LoadInt32(&counter)
+	finalSuccess := atomic.LoadInt32(&successes)
+	logger.Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", finalCount, finalSuccess, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
 		logger.Log.Error(err.Error())
 	}
-
 }
