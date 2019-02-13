@@ -42,7 +42,7 @@ func testLogin(ctx context.Context, username string, password string) {
 	login := fmt.Sprintf("%v@%v:%v", username, domain, password)
 	if ok, err := kSession.TestLogin(username, password); ok {
 		atomic.AddInt32(&successes, 1)
-		logger.Log.Noticef("[+] VALID LOGIN:\t %s : %s", login, password)
+		logger.Log.Noticef("[+] VALID LOGIN:\t %s", login)
 		if stopOnSuccess {
 			cancel()
 		}
