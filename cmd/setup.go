@@ -8,19 +8,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var domain string
-var domainController string
-var verbose bool
-var safe bool
-var threads int
-var stopOnSuccess bool
-var logger util.Logger
-var kSession session.KerbruteSession
+var (
+	domain           string
+	domainController string
+	verbose          bool
+	safe             bool
+	threads          int
+	stopOnSuccess    bool
+	logger           util.Logger
+	kSession         session.KerbruteSession
 
-// Used for multithreading
-var ctx, cancel = context.WithCancel(context.Background())
-var counter int32
-var successes int32
+	// Used for multithreading
+	ctx, cancel = context.WithCancel(context.Background())
+	counter     int32
+	successes   int32
+)
 
 func setupSession(cmd *cobra.Command, args []string) {
 	domain, _ = cmd.Flags().GetString("domain")
