@@ -2,33 +2,37 @@ TARGET=./dist
 ARCHS=amd64 386 
 GOOS=windows linux darwin
 
-.PHONY: windows linux mac all clean
+.PHONY: help windows linux mac all clean
 
-windows:
+help:           ## Show this help.
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+
+windows: ## Make Windows x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for windows $${ARCH}.." ;\
 		GOOS=windows GOARCH=$${ARCH} go build -o ${TARGET}/kerbrute_windows_$${ARCH}.exe ;\
 	done; \
 	echo "Done."
 
-linux:
+linux: ## Make Linux x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for linux $${ARCH}..." ; \
 		GOOS=linux GOARCH=$${ARCH} go build -o ${TARGET}/kerbrute_linux_$${ARCH} ;\
 	done; \
 	echo "Done."
 
-mac:
+mac: ## Make Darwin (Mac) x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for mac $${ARCH}..." ; \
 		GOOS=darwin GOARCH=$${ARCH} go build -o ${TARGET}/kerbrute_darwin_$${ARCH} ;\
 	done; \
 	echo "Done."
 
-clean:
-	@rm ${TARGET}/* ; \
+clean: ## Delete any binaries
+	@rm -f ${TARGET}/* ; \
 	echo "Done."
 
+all: ## Make Windows, Linux and Mac x86/x64 Binaries
 all: clean windows linux mac
 
 
