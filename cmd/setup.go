@@ -27,11 +27,6 @@ var (
 )
 
 func setupSession(cmd *cobra.Command, args []string) {
-	domain, _ = cmd.Flags().GetString("domain")
-	domainController, _ = cmd.Flags().GetString("dc")
-	verbose, _ = cmd.Flags().GetBool("verbose")
-	safe, _ = cmd.Flags().GetBool("safe")
-	logFileName, _ = cmd.Flags().GetString("output")
 	logger = util.NewLogger(verbose, logFileName)
 	var err error
 	kSession, err = session.NewKerbruteSession(domain, domainController, verbose, safe)
