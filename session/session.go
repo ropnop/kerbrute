@@ -33,7 +33,7 @@ type KerbruteSession struct {
 	SafeMode     bool
 }
 
-func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) KerbruteSession {
+func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) (KerbruteSession, error) {
 	realm := strings.ToUpper(domain)
 	configstring := buildKrb5Template(realm, domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
@@ -42,10 +42,10 @@ func NewKerbruteSession(domain string, domainController string, verbose bool, sa
 	}
 	_, kdcs, err := Config.GetKDCs(realm, false)
 	if err != nil {
-		fmt.Println(err)
+		err = fmt.Errorf("Couldn't find any KDCS for %v via DNS. Please manually provide a DC", domain)
 	}
 	k := KerbruteSession{domain, realm, kdcs, configstring, Config, verbose, safemode}
-	return k
+	return k, err
 
 }
 
@@ -79,6 +79,24 @@ func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (k KerbruteSession) TestUsername(username string) bool {
+	// creds := credentials.New(username, k.Realm)
+	// var principalName types.PrincipalName
+	// principalName = types.NewPrincipalName(1, username)
+	// messages.NewASReqForTGT(creds.Domain(), k.Config, creds.CName())
+	// if err != nil {
+	// 	fmt.Printf(err.Error())
+	// }
+	// cl := kclient.NewClientWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
+	// _, err := messages.NewASReqForTGT(cl.Credentials.Domain(), cl.Config, cl.Credentials.CName())
+	// if err != nil {
+	// 	fmt.Printf(err.Error())
+	// }
+	fmt.Println("hello?")
+	return true
+
 }
 
 func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
