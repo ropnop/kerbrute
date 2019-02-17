@@ -33,7 +33,7 @@ type KerbruteSession struct {
 	SafeMode     bool
 }
 
-func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) KerbruteSession {
+func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) (KerbruteSession, error) {
 	realm := strings.ToUpper(domain)
 	configstring := buildKrb5Template(realm, domainController)
 	Config, err := kconfig.NewConfigFromString(configstring)
@@ -42,10 +42,10 @@ func NewKerbruteSession(domain string, domainController string, verbose bool, sa
 	}
 	_, kdcs, err := Config.GetKDCs(realm, false)
 	if err != nil {
-		fmt.Println(err)
+		err = fmt.Errorf("Couldn't find any KDCs for realm %s. Please specify a Domain Controller", realm)
 	}
 	k := KerbruteSession{domain, realm, kdcs, configstring, Config, verbose, safemode}
-	return k
+	return k, err
 
 }
 
