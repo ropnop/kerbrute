@@ -10,5 +10,5 @@ func PrintBanner() {
  / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
 /_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/                                        
 `
-	fmt.Printf("%v\nVersion: %v(%v) - %v - %v\n\n", banner, Version, GitCommit, BuildDate, Author)
+	fmt.Printf("%v\nVersion: %v (%v) - %v - %v\n\n", banner, Version, GitCommit, BuildDate, Author)
 }

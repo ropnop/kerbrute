@@ -7,9 +7,16 @@ COMMIT=`git rev-parse --short HEAD`
 DATE=`date +%m/%d/%y`
 GOVERSION=`go version | cut -d " " -f 3`
 
+ifdef VERSION
+	VERSION := $(VERSION)
+else
+	VERSION := dev
+endif
+
 LDFLAGS="-X ${PACKAGENAME}/util.GitCommit=${COMMIT} \
 -X ${PACKAGENAME}/util.BuildDate=${DATE} \
 -X ${PACKAGENAME}/util.GoVersion=${GOVERSION} \
+-X ${PACKAGENAME}/util.Version=${VERSION} \
 "
 
 .PHONY: help windows linux mac all clean
