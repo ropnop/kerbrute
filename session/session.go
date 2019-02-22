@@ -5,8 +5,11 @@ import (
 	"html/template"
 	"strings"
 
-	kclient "gopkg.in/jcmturner/gokrb5.v7/client"
-	kconfig "gopkg.in/jcmturner/gokrb5.v7/config"
+	"github.com/ropnop/gokrb5/iana/errorcode"
+
+	kclient "github.com/ropnop/gokrb5/client"
+	kconfig "github.com/ropnop/gokrb5/config"
+	"github.com/ropnop/gokrb5/messages"
 )
 
 const krb5ConfigTemplateDNS = `[libdefaults]
@@ -81,7 +84,8 @@ func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 	return true, nil
 }
 
-func (k KerbruteSession) TestUsername(username string) bool {
+func (k KerbruteSession) TestUsername(username string) (bool, error) {
+
 	// creds := credentials.New(username, k.Realm)
 	// var principalName types.PrincipalName
 	// principalName = types.NewPrincipalName(1, username)
@@ -89,14 +93,25 @@ func (k KerbruteSession) TestUsername(username string) bool {
 	// if err != nil {
 	// 	fmt.Printf(err.Error())
 	// }
-	// cl := kclient.NewClientWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
-	// _, err := messages.NewASReqForTGT(cl.Credentials.Domain(), cl.Config, cl.Credentials.CName())
-	// if err != nil {
-	// 	fmt.Printf(err.Error())
-	// }
-	fmt.Println("hello?")
-	return true
+	cl := kclient.NewClientWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
 
+	req, err := messages.NewASReqForTGT(cl.Credentials.Domain(), cl.Config, cl.Credentials.CName())
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	b, err := req.Marshal()
+	if err != nil {
+		return false, err
+	}
+	_, err = cl.SendToKDC(b, k.Realm)
+	if err != nil {
+		if e, ok := err.(messages.KRBError); ok {
+			if e.ErrorCode == errorcode.KDC_ERR_PREAUTH_REQUIRED {
+				return true, nil
+			}
+		}
+	}
+	return false, err
 }
 
 func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
