@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/ropnop/kerbrute
+    steps:
+      - checkout
+      - run: make all
+      - store_artifacts:
+          path: ./dist
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ./*
+
+  github-release:
+    docker:
+      - image: cibuilds/github:0.10
+        steps:
+          - attach_workspace:
+              at: ./artifacts
+          - run:
+              name: "Publish Binaries on Github"
+              command: |
+                ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION}-binaries ./artifacts/
