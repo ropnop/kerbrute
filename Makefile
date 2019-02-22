@@ -27,7 +27,7 @@ windows: ## Make Windows x86 and x64 Binaries
 linux: ## Make Linux x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for linux $${ARCH}..." ; \
-		GOOS=linux GOARCH=$${ARCH} go build -ldflags "${LDFLAGS}" -o ${TARGET}/kerbrute_linux_$${ARCH} ;\
+		GOOS=linux GOARCH=$${ARCH} go build -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_$${ARCH} ;\
 	done; \
 	echo "Done."
 
