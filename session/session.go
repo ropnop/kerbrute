@@ -42,7 +42,7 @@ func NewKerbruteSession(domain string, domainController string, verbose bool, sa
 	}
 	_, kdcs, err := Config.GetKDCs(realm, false)
 	if err != nil {
-		err = fmt.Errorf("Couldn't find any KDCS for %v via DNS. Please manually provide a DC", domain)
+		err = fmt.Errorf("Couldn't find any KDCs for realm %s. Please specify a Domain Controller", realm)
 	}
 	k := KerbruteSession{domain, realm, kdcs, configstring, Config, verbose, safemode}
 	return k, err
