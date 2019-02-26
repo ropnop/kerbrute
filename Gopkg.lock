@@ -37,6 +37,43 @@
   version = "v1"
 
 [[projects]]
+  digest = "1:4fd2e78d375f9ddd13ba4d739ddf4b1eaf154593e8a249f728a00d326f3b9954"
+  name = "github.com/ropnop/gokrb5"
+  packages = [
+    "asn1tools",
+    "client",
+    "config",
+    "credentials",
+    "crypto",
+    "crypto/common",
+    "crypto/etype",
+    "crypto/rfc3961",
+    "crypto/rfc3962",
+    "crypto/rfc4757",
+    "crypto/rfc8009",
+    "iana",
+    "iana/addrtype",
+    "iana/adtype",
+    "iana/asnAppTag",
+    "iana/chksumtype",
+    "iana/errorcode",
+    "iana/etypeID",
+    "iana/flags",
+    "iana/keyusage",
+    "iana/msgtype",
+    "iana/nametype",
+    "iana/patype",
+    "kadmin",
+    "keytab",
+    "krberror",
+    "messages",
+    "pac",
+    "types",
+  ]
+  pruneopts = "UT"
+  revision = "10e0941da4e2127f201a70d2932290dfa256ce4c"
+
+[[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
   name = "github.com/spf13/cobra"
   packages = ["."]
@@ -80,44 +117,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:f088ad0e8b1c4a92884601d9559f04f25e1de785990bd441ce3f643da96cb770"
-  name = "gopkg.in/jcmturner/gokrb5.v7"
-  packages = [
-    "asn1tools",
-    "client",
-    "config",
-    "credentials",
-    "crypto",
-    "crypto/common",
-    "crypto/etype",
-    "crypto/rfc3961",
-    "crypto/rfc3962",
-    "crypto/rfc4757",
-    "crypto/rfc8009",
-    "iana",
-    "iana/addrtype",
-    "iana/adtype",
-    "iana/asnAppTag",
-    "iana/chksumtype",
-    "iana/errorcode",
-    "iana/etypeID",
-    "iana/flags",
-    "iana/keyusage",
-    "iana/msgtype",
-    "iana/nametype",
-    "iana/patype",
-    "kadmin",
-    "keytab",
-    "krberror",
-    "messages",
-    "pac",
-    "types",
-  ]
-  pruneopts = "UT"
-  revision = "c4704ed0c8aae9d6704adea9ee537856a78777ac"
-  version = "v7.1.0"
-
-[[projects]]
   digest = "1:0f16d9c577198e3b8d3209f5a89aabe679525b2aba2a7548714e973035c0e232"
   name = "gopkg.in/jcmturner/rpc.v1"
   packages = [
@@ -133,9 +132,11 @@
   analyzer-version = 1
   input-imports = [
     "github.com/op/go-logging",
+    "github.com/ropnop/gokrb5/client",
+    "github.com/ropnop/gokrb5/config",
+    "github.com/ropnop/gokrb5/iana/errorcode",
+    "github.com/ropnop/gokrb5/messages",
     "github.com/spf13/cobra",
-    "gopkg.in/jcmturner/gokrb5.v7/client",
-    "gopkg.in/jcmturner/gokrb5.v7/config",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/op/go-logging"
   version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/ropnop/gokrb5"
+  revision = "10e0941da4e2127f201a70d2932290dfa256ce4c"
