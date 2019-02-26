@@ -76,8 +76,9 @@ func (cl *Client) addSession(tgt messages.Ticket, dep messages.EncKDCRepPart) {
 		// Not a TGT
 		return
 	}
+	realm := tgt.SName.NameString[len(tgt.SName.NameString)-1]
 	s := &session{
-		realm:                tgt.SName.NameString[len(tgt.SName.NameString)-1],
+		realm:                realm,
 		authTime:             dep.AuthTime,
 		endTime:              dep.EndTime,
 		renewTill:            dep.RenewTill,
@@ -87,6 +88,7 @@ func (cl *Client) addSession(tgt messages.Ticket, dep messages.EncKDCRepPart) {
 	}
 	cl.sessions.update(s)
 	cl.enableAutoSessionRenewal(s)
+	cl.Log("TGT session added for %s (EndTime: %v)", realm, dep.EndTime)
 }
 
 // update overwrites the session details with those from the TGT and decrypted encPart
@@ -156,6 +158,9 @@ func (cl *Client) enableAutoSessionRenewal(s *session) {
 			select {
 			case <-timer.C:
 				renewal, err := cl.refreshSession(s)
+				if err != nil {
+					cl.Log("error refreshing session: %v", err)
+				}
 				if !renewal && err == nil {
 					// end this goroutine as there will have been a new login and new auto renewal goroutine created.
 					return
@@ -178,10 +183,11 @@ func (cl *Client) renewTGT(s *session) error {
 	}
 	_, tgsRep, err := cl.TGSREQGenerateAndExchange(spn, cl.Credentials.Domain(), tgt, skey, true)
 	if err != nil {
-		return krberror.Errorf(err, krberror.KRBMsgError, "error renewing TGT")
+		return krberror.Errorf(err, krberror.KRBMsgError, "error renewing TGT for %s", realm)
 	}
 	s.update(tgsRep.Ticket, tgsRep.DecryptedEncPart)
 	cl.sessions.update(s)
+	cl.Log("TGT session renewed for %s (EndTime: %v)", realm, tgsRep.DecryptedEncPart.EndTime)
 	return nil
 }
 
@@ -192,6 +198,7 @@ func (cl *Client) refreshSession(s *session) (bool, error) {
 	realm := s.realm
 	renewTill := s.renewTill
 	s.mux.RUnlock()
+	cl.Log("refreshing TGT session for %s", realm)
 	if time.Now().UTC().Before(renewTill) {
 		err := cl.renewTGT(s)
 		return true, err
