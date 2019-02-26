@@ -229,5 +229,4 @@ func (cl *Client) Destroy() {
 	cl.sessions.destroy()
 	cl.cache.clear()
 	cl.Credentials = creds
-	cl.Log("client destroyed")
 }

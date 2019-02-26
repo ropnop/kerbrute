@@ -37,20 +37,6 @@
   version = "v1"
 
 [[projects]]
-  digest = "1:fccdfebfeb6cc06e7cd012bd967412d6f3514b9110282644807d1a66cddef989"
-  name = "github.com/ropnop/gokrb5"
-  packages = [
-    ".",
-    "client",
-    "config",
-    "iana/errorcode",
-    "messages",
-  ]
-  pruneopts = "UT"
-  revision = "08f6f69d25012ad9acd02181dd381b4b1a805210"
-  version = "v7.2.0"
-
-[[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
   name = "github.com/spf13/cobra"
   packages = ["."]
@@ -94,10 +80,11 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:7f48b21ae8ce9515425b866127ac5b636af7a41b964cfee2cd598dcaeefa9d20"
+  digest = "1:f088ad0e8b1c4a92884601d9559f04f25e1de785990bd441ce3f643da96cb770"
   name = "gopkg.in/jcmturner/gokrb5.v7"
   packages = [
     "asn1tools",
+    "client",
     "config",
     "credentials",
     "crypto",
@@ -146,12 +133,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/op/go-logging",
-    "github.com/ropnop/gokrb5",
-    "github.com/ropnop/gokrb5/client",
-    "github.com/ropnop/gokrb5/config",
-    "github.com/ropnop/gokrb5/iana/errorcode",
-    "github.com/ropnop/gokrb5/messages",
     "github.com/spf13/cobra",
+    "gopkg.in/jcmturner/gokrb5.v7/client",
+    "gopkg.in/jcmturner/gokrb5.v7/config",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
