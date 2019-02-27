@@ -85,14 +85,6 @@ func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 }
 
 func (k KerbruteSession) TestUsername(username string) (bool, error) {
-
-	// creds := credentials.New(username, k.Realm)
-	// var principalName types.PrincipalName
-	// principalName = types.NewPrincipalName(1, username)
-	// messages.NewASReqForTGT(creds.Domain(), k.Config, creds.CName())
-	// if err != nil {
-	// 	fmt.Printf(err.Error())
-	// }
 	cl := kclient.NewClientWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
 
 	req, err := messages.NewASReqForTGT(cl.Credentials.Domain(), cl.Config, cl.Credentials.CName())
