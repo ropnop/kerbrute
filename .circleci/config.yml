@@ -3,12 +3,10 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.11
-    environment:
-      VERSION: ${CIRCLE_TAG}
     working_directory: /go/src/github.com/ropnop/kerbrute
     steps:
       - checkout
-      - run: make all
+      - run: VERSION=${CIRCLE_TAG} make all
       - store_artifacts:
           path: ./dist
       - persist_to_workspace:
