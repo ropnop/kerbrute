@@ -32,8 +32,6 @@ workflows:
       - build
       - github-release:
           filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
           context: "Github Token"
