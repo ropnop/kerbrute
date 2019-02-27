@@ -23,4 +23,20 @@ jobs:
           - run:
               name: "Publish Binaries on Github"
               command: |
-                ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION}-binaries ./artifacts/
+                ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - github-release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+          context: "Github Token"
+          requires:
+            - build
+          
