@@ -28,6 +28,10 @@ var (
 
 func setupSession(cmd *cobra.Command, args []string) {
 	logger = util.NewLogger(verbose, logFileName)
+	if domain == "" {
+		logger.Log.Error("No domain specified. You must specify a full domain")
+		os.Exit(1)
+	}
 	var err error
 	kSession, err = session.NewKerbruteSession(domain, domainController, verbose, safe)
 	if err != nil {

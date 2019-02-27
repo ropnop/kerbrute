@@ -13,7 +13,7 @@ type Logger struct {
 func NewLogger(verbose bool, logFileName string) Logger {
 	log := logging.MustGetLogger("kerbrute")
 	format := logging.MustStringFormatter(
-		`%{color}%{time:2006/01/02 15:04:05} ▶  %{message}%{color:reset}`,
+		`%{color}%{time:2006/01/02 15:04:05} >  %{message}%{color:reset}`,
 	)
 	formatNoColor := logging.MustStringFormatter(
 		`%{time:2006/01/02 15:04:05} >  %{message}`,

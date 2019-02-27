@@ -7,9 +7,16 @@ COMMIT=`git rev-parse --short HEAD`
 DATE=`date +%m/%d/%y`
 GOVERSION=`go version | cut -d " " -f 3`
 
+ifdef VERSION
+	VERSION := $(VERSION)
+else
+	VERSION := dev
+endif
+
 LDFLAGS="-X ${PACKAGENAME}/util.GitCommit=${COMMIT} \
 -X ${PACKAGENAME}/util.BuildDate=${DATE} \
 -X ${PACKAGENAME}/util.GoVersion=${GOVERSION} \
+-X ${PACKAGENAME}/util.Version=${VERSION} \
 "
 
 .PHONY: help windows linux mac all clean
@@ -27,7 +34,7 @@ windows: ## Make Windows x86 and x64 Binaries
 linux: ## Make Linux x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for linux $${ARCH}..." ; \
-		GOOS=linux GOARCH=$${ARCH} go build -ldflags "${LDFLAGS}" -o ${TARGET}/kerbrute_linux_$${ARCH} ;\
+		GOOS=linux GOARCH=$${ARCH} go build -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_$${ARCH} ;\
 	done; \
 	echo "Done."
 
