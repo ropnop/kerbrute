@@ -67,8 +67,9 @@ func testLogin(ctx context.Context, username string, password string) {
 		if !ok {
 			logger.Log.Errorf("[!] %v - %v", login, errorString)
 			cancel()
+		} else {
+			logger.Log.Debugf("[!] %v - %v", login, errorString)
 		}
-		logger.Log.Debugf("[!] %v - %v", login, errorString)
 	}
 }
 
@@ -84,7 +85,8 @@ func testUsername(ctx context.Context, username string) {
 		if !ok {
 			logger.Log.Errorf("[!] %v - %v", usernamefull, errorString)
 			cancel()
+		} else {
+			logger.Log.Debugf("[!] %v - %v", usernamefull, errorString)
 		}
-		logger.Log.Debugf("[!] %v - %v", usernamefull, errorString)
 	}
 }
