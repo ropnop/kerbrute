@@ -111,7 +111,7 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	if strings.Contains(eString, "Networking_Error: AS Exchange Error") {
 		return false, "NETWORK ERROR - Can't talk to KDC. Aborting..."
 	}
-	if strings.Contains(eString, "KDC_ERROR_WRONG_REALM") {
+	if strings.Contains(eString, "KDC_ERR_WRONG_REALM") {
 		return false, "KDC ERROR - Wrong Realm. Try adjusting the domain? Aborting..."
 	}
 	if strings.Contains(eString, "client does not have a username") {
