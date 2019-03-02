@@ -72,7 +72,7 @@ func buildKrb5Template(realm, domainController string) string {
 }
 
 func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
-	Client := kclient.NewClientWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true))
+	Client := kclient.NewClientWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true))
 	defer Client.Destroy()
 	if ok, err := Client.IsConfigured(); !ok {
 		return false, err
