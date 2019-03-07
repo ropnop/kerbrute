@@ -20,7 +20,7 @@ A domain (`-d`) or a domain controller (`--dc`) must be specified. If a Domain C
 
 By default, Kerbrute is multithreaded and uses 10 threads. This can be changed with the `-t` option.
 
-Output is logged to stdout, but a log file can be specified with `-w`.
+Output is logged to stdout, but a log file can be specified with `-o`.
 
 By default, failures are not logged, but that can be changed with `-v`.
 
