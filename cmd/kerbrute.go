@@ -29,6 +29,5 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log failures and errors")
 	rootCmd.PersistentFlags().BoolVar(&safe, "safe", false, "Safe mode. Will abort if any user comes back as locked out. Default: FALSE")
 	rootCmd.PersistentFlags().IntVarP(&threads, "threads", "t", 10, "Threads to use")
-	// rootCmd.MarkPersistentFlagRequired("domain")
 
 }
