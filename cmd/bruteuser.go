@@ -32,6 +32,7 @@ func init() {
 func bruteForce(cmd *cobra.Command, args []string) {
 	passwordlist := args[0]
 	stopOnSuccess = true
+	kSession.SafeMode = true
 	username, err := util.FormatUsername(args[1])
 	if err != nil {
 		logger.Log.Error(err.Error())
