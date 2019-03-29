@@ -95,7 +95,7 @@ func (k KerbruteSession) TestUsername(username string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	_, err = cl.SendToKDC(b, k.Realm)
+	rb, err := cl.SendToKDC(b, k.Realm)
 	if err != nil {
 		if e, ok := err.(messages.KRBError); ok {
 			if e.ErrorCode == errorcode.KDC_ERR_PREAUTH_REQUIRED {
@@ -103,7 +103,15 @@ func (k KerbruteSession) TestUsername(username string) (bool, error) {
 			}
 		}
 	}
-	return false, err
+	// if we made it here, we got an AS REP, meaning pre-auth was probably not required. try to unmarshal it to make sure format is right
+	var ASRep messages.ASRep
+	err = ASRep.Unmarshal(rb)
+	if err != nil {
+		return false, err
+	}
+	// AS REP was valid, user therefore exists (don't bother trying to decrypt)
+	return true, err
+
 }
 
 func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
