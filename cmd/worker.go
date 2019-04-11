@@ -76,10 +76,11 @@ func testLogin(ctx context.Context, username string, password string) {
 func testUsername(ctx context.Context, username string) {
 	atomic.AddInt32(&counter, 1)
 	usernamefull := fmt.Sprintf("%v@%v", username, domain)
-	if ok, err := kSession.TestUsername(username); ok {
+	valid, err := kSession.TestUsername(username)
+	if valid {
 		atomic.AddInt32(&successes, 1)
 		logger.Log.Notice("[+] VALID USERNAME:\t %s", usernamefull)
-	} else {
+	} else if err != nil {
 		// This is to determine if the error is "okay" or if we should abort everything
 		ok, errorString := kSession.HandleKerbError(err)
 		if !ok {
@@ -88,5 +89,7 @@ func testUsername(ctx context.Context, username string) {
 		} else {
 			logger.Log.Debugf("[!] %v - %v", usernamefull, errorString)
 		}
+	} else {
+		logger.Log.Debug("[!] Unknown behavior - %v", usernamefull)
 	}
 }
