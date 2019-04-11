@@ -81,8 +81,6 @@ func testUsername(ctx context.Context, username string) {
 		atomic.AddInt32(&successes, 1)
 		logger.Log.Notice("[+] VALID USERNAME:\t %s", usernamefull)
 	} else if err != nil {
-		logger.Log.Debug("[!] Got error trying:\t %s", usernamefull)
-		logger.Log.Errorf("[!] Trying to handle error: %v", err)
 		// This is to determine if the error is "okay" or if we should abort everything
 		ok, errorString := kSession.HandleKerbError(err)
 		if !ok {
