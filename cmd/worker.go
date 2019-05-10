@@ -17,7 +17,8 @@ func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.Wait
 			if !ok {
 				return
 			}
-			testLogin(ctx, username, password)
+            password2 = ReplaceAll(password, '\1', username)
+			testLogin(ctx, username, password2)
 		}
 	}
 }

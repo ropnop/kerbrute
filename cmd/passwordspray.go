@@ -22,7 +22,9 @@ var passwordSprayCmd = &cobra.Command{
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
 Succesful logins will be displayed on stdout.
-WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
+WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts!
+"\1" will be replaced with the username.
+`,
 	Args:   cobra.ExactArgs(2),
 	PreRun: setupSession,
 	Run:    passwordSpray,
