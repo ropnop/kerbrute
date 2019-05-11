@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -36,7 +37,7 @@ func bruteForceCombos(cmd *cobra.Command, args []string) {
 
 	var wg sync.WaitGroup
 	wg.Add(threads)
-
+	file, err := os.Open(combolist)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return
