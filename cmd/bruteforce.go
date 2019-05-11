@@ -64,6 +64,9 @@ Scan:
 			break Scan
 		default:
 			comboline := scanner.Text()
+      if comboline == "" { 
+        continue
+      }
 			username, password, err := util.FormatComboLine(comboline)
 			if err != nil {
 				logger.Log.Debug("[!] Skipping: %q - %v", comboline, err.Error())
