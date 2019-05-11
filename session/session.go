@@ -137,6 +137,9 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 		}
 		return true, "USER LOCKED OUT"
 	}
+	if strings.Contains(eString, " AS_REP is not valid or client password/keytab incorrect") {
+		return true, "Got AS-REP (no pre-auth) but couldn't decrypt - bad password"
+	}
 	return true, eString
 
 }
