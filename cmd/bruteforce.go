@@ -37,17 +37,23 @@ func bruteForceCombos(cmd *cobra.Command, args []string) {
 
 	var wg sync.WaitGroup
 	wg.Add(threads)
-	file, err := os.Open(combolist)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		return
+
+	var scanner *bufio.Scanner
+	if combolist != "-" {
+		file, err := os.Open(combolist)
+		if err != nil {
+			logger.Log.Error(err.Error())
+			return
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(file)
+	} else {
+		scanner = bufio.NewScanner(os.Stdin)
 	}
-	defer file.Close()
 
 	for i := 0; i < threads; i++ {
 		go makeBruteComboWorker(ctx, combosChan, &wg)
 	}
-	scanner := bufio.NewScanner(file)
 
 	start := time.Now()
 
