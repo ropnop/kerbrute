@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 )
 
-func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitGroup, password string) {
+func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitGroup, password string, userAsPass bool) {
 	defer wg.Done()
 	for {
 		select {
@@ -17,7 +17,11 @@ func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.Wait
 			if !ok {
 				return
 			}
-			testLogin(ctx, username, password)
+			if userAsPass {
+				testLogin(ctx, username, username)
+			} else {
+				testLogin(ctx, username, password)
+			}
 		}
 	}
 }
