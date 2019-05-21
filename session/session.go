@@ -79,6 +79,9 @@ func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 	}
 	err := Client.Login()
 	if err != nil {
+		if strings.Contains(err.Error(), "Password has expired") {
+			return true, nil
+		}
 		return false, err
 	}
 	return true, nil

@@ -17,6 +17,7 @@ var (
 	safe             bool
 	threads          int
 	stopOnSuccess    bool
+	userAsPass       = false
 	logger           util.Logger
 	kSession         session.KerbruteSession
 
