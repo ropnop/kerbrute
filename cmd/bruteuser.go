@@ -22,14 +22,14 @@ A full domain is required. This domain will be capitalized and used as the Kerbe
 WARNING: only run this if there's no lockout policy!`,
 	Args:   cobra.ExactArgs(2),
 	PreRun: setupSession,
-	Run:    bruteForce,
+	Run:    bruteForceUser,
 }
 
 func init() {
 	rootCmd.AddCommand(bruteuserCmd)
 }
 
-func bruteForce(cmd *cobra.Command, args []string) {
+func bruteForceUser(cmd *cobra.Command, args []string) {
 	passwordlist := args[0]
 	stopOnSuccess = true
 	kSession.SafeMode = true

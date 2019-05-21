@@ -56,6 +56,21 @@ func makeEnumWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitG
 	}
 }
 
+func makeBruteComboWorker(ctx context.Context, combos <-chan [2]string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		select {
+		case <-ctx.Done():
+			break
+		case combo, ok := <-combos:
+			if !ok {
+				return
+			}
+			testLogin(ctx, combo[0], combo[1])
+		}
+	}
+}
+
 func testLogin(ctx context.Context, username string, password string) {
 	atomic.AddInt32(&counter, 1)
 	login := fmt.Sprintf("%v@%v:%v", username, domain, password)

@@ -13,6 +13,7 @@ For more background and information, check out my Troopers 2019 talk, Fun with L
 ## Usage
 Kerbrute has three main commands:
  * **bruteuser** - Bruteforce a single user's password from a wordlist
+ * **bruteforce** - Read username:password combos from a file or stdin and test them
  * **passwordspray** - Test a single password against a list of users
  * **usernenum** - Enumerate valid domain usernames via Kerberos
 
@@ -130,6 +131,26 @@ Version: dev (43f9ca1) - 03/06/19 - Ronnie Flathers @ropnop
 2019/03/06 21:38:27 >  Done! Tested 1001 logins (1 successes) in 2.711 seconds
 ```
 
+### Brute Force
+This mode simply reads username and password combinations (in the format `username:password`) from a file or from `stdin` and tests them with Kerberos PreAuthentication. It will skip any blank lines or lines with blank usernames/passwords. This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
+```
+$ cat combos.lst | ./kerbrute -d lab.ropnop.com bruteforce -
+
+    __             __               __
+   / /_____  _____/ /_  _______  __/ /____
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/
+
+Version: dev (n/a) - 05/11/19 - Ronnie Flathers @ropnop
+
+2019/05/11 18:40:56 >  Using KDC(s):
+2019/05/11 18:40:56 >   pdc01.lab.ropnop.com:88
+
+2019/05/11 18:40:56 >  [+] VALID LOGIN:  athomas@lab.ropnop.com:Password1234
+2019/05/11 18:40:56 >  Done! Tested 7 logins (1 successes) in 0.114 seconds
+```
+
 ## Installing
 You can download pre-compiled binaries for Linux, Windows and Mac from the [releases page](https://github.com/ropnop/kerbrute/releases/tag/latest). If you want to live on the edge, you can also install with Go:
 
@@ -166,4 +187,4 @@ kerbrute_darwin_amd64      kerbrute_linux_amd64       kerbrute_windows_amd64.exe
 ```
 
 ## Credits
-Huge shoutout to jcmturner for his pure Go implemntation of KRB5: https://github.com/jcmturner/gokrb5 . An amazing project and very well documented. Couldn't have done any of this without that project.
+Huge shoutout to jcmturner for his pure Go implementation of KRB5: https://github.com/jcmturner/gokrb5 . An amazing project and very well documented. Couldn't have done any of this without that project.
