@@ -19,7 +19,7 @@ var password string
 
 var passwordSprayCmd = &cobra.Command{
 	Use:   "passwordspray [flags] <username_wordlist> <password>",
-	Short: "Test a single password against a list of users",
+	Short: "Test a single password against a list of users (use - for stdin)",
 	Long: `Will perform a password spray attack against a list of users using Kerberos Pre-Authentication by requesting a TGT from the KDC.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
@@ -56,17 +56,22 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	var wg sync.WaitGroup
 	wg.Add(threads)
 
-	file, err := os.Open(usernamelist)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		return
+	var scanner *bufio.Scanner
+	if usernamelist != "-" {
+		file, err := os.Open(usernamelist)
+		if err != nil {
+			logger.Log.Error(err.Error())
+			return
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(file)
+	} else {
+		scanner = bufio.NewScanner(os.Stdin)
 	}
-	defer file.Close()
 
 	for i := 0; i < threads; i++ {
 		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass)
 	}
-	scanner := bufio.NewScanner(file)
 
 	start := time.Now()
 

@@ -15,7 +15,7 @@ import (
 // bruteuserCmd represents the bruteuser command
 var bruteuserCmd = &cobra.Command{
 	Use:   "bruteuser [flags] <password_list> username",
-	Short: "Bruteforce a single user's password from a wordlist",
+	Short: "Bruteforce a single user's password from a wordlist (use - for stdin)",
 	Long: `Will perform a password bruteforce against a single domain user using Kerberos Pre-Authentication by requesting at TGT from the KDC.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
@@ -45,17 +45,22 @@ func bruteForceUser(cmd *cobra.Command, args []string) {
 	var wg sync.WaitGroup
 	wg.Add(threads)
 
-	file, err := os.Open(passwordlist)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		return
+	var scanner *bufio.Scanner
+	if passwordlist != "-" {
+		file, err := os.Open(passwordlist)
+		if err != nil {
+			logger.Log.Error(err.Error())
+			return
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(file)
+	} else {
+		scanner = bufio.NewScanner(os.Stdin)
 	}
-	defer file.Close()
 
 	for i := 0; i < threads; i++ {
 		go makeBruteWorker(ctx, passwordsChan, &wg, username)
 	}
-	scanner := bufio.NewScanner(file)
 	start := time.Now()
 
 	var password string
