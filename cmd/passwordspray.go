@@ -15,6 +15,8 @@ import (
 var usernameList string
 var password string
 
+// var userAsPass bool
+
 var passwordSprayCmd = &cobra.Command{
 	Use:   "passwordspray [flags] <username_wordlist> <password>",
 	Short: "Test a single password against a list of users",
@@ -23,18 +25,29 @@ If no domain controller is specified, the tool will attempt to look one up via D
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
 Succesful logins will be displayed on stdout.
 WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
-	Args:   cobra.ExactArgs(2),
+	Args:   cobra.MinimumNArgs(1),
 	PreRun: setupSession,
 	Run:    passwordSpray,
 }
 
 func init() {
+	passwordSprayCmd.Flags().BoolVar(&userAsPass, "user-as-pass", false, "Spray every account with the username as the password")
 	rootCmd.AddCommand(passwordSprayCmd)
+
 }
 
 func passwordSpray(cmd *cobra.Command, args []string) {
 	usernamelist := args[0]
-	password := args[1]
+	if !userAsPass {
+		if len(args) != 2 {
+			logger.Log.Error("You must specify a password to spray with, or --user-as-pass")
+			os.Exit(1)
+		} else {
+			password = args[1]
+		}
+	} else {
+		password = "foobar" //it doesn't matter, won't use it
+	}
 	stopOnSuccess = false
 
 	usersChan := make(chan string, threads)
@@ -51,7 +64,7 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	defer file.Close()
 
 	for i := 0; i < threads; i++ {
-		go makeSprayWorker(ctx, usersChan, &wg, password)
+		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass)
 	}
 	scanner := bufio.NewScanner(file)
 
