@@ -4,9 +4,9 @@ go 1.13
 
 require (
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
-	github.com/jcmturner/gofork v0.0.0-20180107083740-2aebee971930 // indirect
+	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/op/go-logging v0.0.0-20160211212156-b2cb9fa56473
+	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/ropnop/gokrb5 v7.2.1-0.20190226233023-10e0941da4e2+incompatible
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
