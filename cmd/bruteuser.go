@@ -44,7 +44,7 @@ func bruteForceUser(cmd *cobra.Command, args []string) {
 
 	var wg sync.WaitGroup
 	wg.Add(threads)
-	
+
 	var scanner *bufio.Scanner
 	if passwordlist != "-" {
 		file, err := os.Open(passwordlist)
@@ -61,7 +61,7 @@ func bruteForceUser(cmd *cobra.Command, args []string) {
 	for i := 0; i < threads; i++ {
 		go makeBruteWorker(ctx, passwordsChan, &wg, username)
 	}
-	
+
 	start := time.Now()
 
 	var password string
@@ -72,6 +72,7 @@ Scan:
 			break Scan
 		default:
 			password = scanner.Text()
+			time.Sleep(time.Duration(delay) * time.Millisecond)
 			passwordsChan <- password
 		}
 	}

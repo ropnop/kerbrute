@@ -15,6 +15,7 @@ var (
 	logFileName      string
 	verbose          bool
 	safe             bool
+	delay            int
 	threads          int
 	stopOnSuccess    bool
 	userAsPass       = false
