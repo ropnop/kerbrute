@@ -1,0 +1,53 @@
+# github.com/hashicorp/go-uuid v1.0.1
+github.com/hashicorp/go-uuid
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/jcmturner/gofork v1.0.0
+github.com/jcmturner/gofork/encoding/asn1
+github.com/jcmturner/gofork/x/crypto/pbkdf2
+# github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
+github.com/op/go-logging
+# github.com/ropnop/gokrb5 v7.2.1-0.20190226233023-10e0941da4e2+incompatible
+github.com/ropnop/gokrb5/asn1tools
+github.com/ropnop/gokrb5/client
+github.com/ropnop/gokrb5/config
+github.com/ropnop/gokrb5/credentials
+github.com/ropnop/gokrb5/crypto
+github.com/ropnop/gokrb5/crypto/common
+github.com/ropnop/gokrb5/crypto/etype
+github.com/ropnop/gokrb5/crypto/rfc3961
+github.com/ropnop/gokrb5/crypto/rfc3962
+github.com/ropnop/gokrb5/crypto/rfc4757
+github.com/ropnop/gokrb5/crypto/rfc8009
+github.com/ropnop/gokrb5/iana
+github.com/ropnop/gokrb5/iana/addrtype
+github.com/ropnop/gokrb5/iana/adtype
+github.com/ropnop/gokrb5/iana/asnAppTag
+github.com/ropnop/gokrb5/iana/chksumtype
+github.com/ropnop/gokrb5/iana/errorcode
+github.com/ropnop/gokrb5/iana/etypeID
+github.com/ropnop/gokrb5/iana/flags
+github.com/ropnop/gokrb5/iana/keyusage
+github.com/ropnop/gokrb5/iana/msgtype
+github.com/ropnop/gokrb5/iana/nametype
+github.com/ropnop/gokrb5/iana/patype
+github.com/ropnop/gokrb5/kadmin
+github.com/ropnop/gokrb5/keytab
+github.com/ropnop/gokrb5/krberror
+github.com/ropnop/gokrb5/messages
+github.com/ropnop/gokrb5/pac
+github.com/ropnop/gokrb5/types
+# github.com/spf13/cobra v0.0.5
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.5
+github.com/spf13/pflag
+# golang.org/x/crypto v0.0.0-20191107222254-f4817d981bb6
+golang.org/x/crypto/md4
+golang.org/x/crypto/pbkdf2
+# gopkg.in/jcmturner/aescts.v1 v1.0.1
+gopkg.in/jcmturner/aescts.v1
+# gopkg.in/jcmturner/dnsutils.v1 v1.0.1
+gopkg.in/jcmturner/dnsutils.v1
+# gopkg.in/jcmturner/rpc.v1 v1.1.0
+gopkg.in/jcmturner/rpc.v1/mstypes
+gopkg.in/jcmturner/rpc.v1/ndr
