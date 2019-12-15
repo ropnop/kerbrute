@@ -44,4 +44,7 @@ func setupSession(cmd *cobra.Command, args []string) {
 	for _, v := range kSession.Kdcs {
 		logger.Log.Infof("\t%s\n", v)
 	}
+	if delay != 0 {
+		logger.Log.Infof("Delay set. Using single thread and delaying %dms between attempts\n", delay)
+	}
 }
