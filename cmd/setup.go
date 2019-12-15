@@ -15,6 +15,7 @@ var (
 	logFileName      string
 	verbose          bool
 	safe             bool
+	delay            int
 	threads          int
 	stopOnSuccess    bool
 	userAsPass       = false
@@ -42,5 +43,8 @@ func setupSession(cmd *cobra.Command, args []string) {
 	logger.Log.Info("Using KDC(s):")
 	for _, v := range kSession.Kdcs {
 		logger.Log.Infof("\t%s\n", v)
+	}
+	if delay != 0 {
+		logger.Log.Infof("Delay set. Using single thread and delaying %dms between attempts\n", delay)
 	}
 }

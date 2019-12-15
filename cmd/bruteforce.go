@@ -64,14 +64,15 @@ Scan:
 			break Scan
 		default:
 			comboline := scanner.Text()
-      if comboline == "" { 
-        continue
-      }
+			if comboline == "" {
+				continue
+			}
 			username, password, err := util.FormatComboLine(comboline)
 			if err != nil {
 				logger.Log.Debug("[!] Skipping: %q - %v", comboline, err.Error())
 				continue
 			}
+			time.Sleep(time.Duration(delay) * time.Millisecond)
 			combosChan <- [2]string{username, password}
 		}
 	}
