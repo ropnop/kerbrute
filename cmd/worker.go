@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -87,7 +88,11 @@ func testLogin(ctx context.Context, username string, password string) {
 			logger.Log.Errorf("[!] %v - %v", login, errorString)
 			cancel()
 		} else {
-			logger.Log.Debugf("[!] %v - %v", login, errorString)
+			if strings.Contains(errorString, "no pre-auth") {
+				logger.Log.Noticef("[+] NO PRE-AUTH REQUIRED:\t %s@%s", username, domain)
+			} else {
+				logger.Log.Debugf("[!] %v - %v", login, errorString)
+			}
 		}
 	}
 }
