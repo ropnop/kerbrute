@@ -143,6 +143,9 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	if strings.Contains(eString, " AS_REP is not valid or client password/keytab incorrect") {
 		return true, "Got AS-REP (no pre-auth) but couldn't decrypt - bad password"
 	}
+	if strings.Contains(eString, "KRB_AP_ERR_SKEW Clock skew too great") {
+		return true, "Clock skew too great"
+	}
 	return true, eString
 
 }
