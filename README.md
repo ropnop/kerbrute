@@ -17,7 +17,7 @@ Kerbrute has three main commands:
  * **bruteuser** - Bruteforce a single user's password from a wordlist
  * **bruteforce** - Read username:password combos from a file or stdin and test them
  * **passwordspray** - Test a single password against a list of users
- * **usernenum** - Enumerate valid domain usernames via Kerberos
+ * **userenum** - Enumerate valid domain usernames via Kerberos
 
 A domain (`-d`) or a domain controller (`--dc`) must be specified. If a Domain Controller is not given the KDC will be looked up via DNS.
 
@@ -92,7 +92,7 @@ Version: dev (43f9ca1) - 03/06/19 - Ronnie Flathers @ropnop
 ```
 
 ### Password Spray
-With `passwordwpray`, Kerbrute will perform a horizontal brute force attack against a list of domain users. This is useful for testing one or two common passwords when you have a large list of users. WARNING: this does will increment the failed login count and lock out accounts. This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
+With `passwordspray`, Kerbrute will perform a horizontal brute force attack against a list of domain users. This is useful for testing one or two common passwords when you have a large list of users. WARNING: this does will increment the failed login count and lock out accounts. This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
 
 ```
 root@kali:~# ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com domain_users.txt Password123
