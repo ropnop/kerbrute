@@ -63,7 +63,7 @@ Scan:
 			usernameline := scanner.Text()
 			username, err := util.FormatUsername(usernameline)
 			if err != nil {
-				logger.Log.Debug("[!] %q - %v", usernameline, err.Error())
+				logger.Log.Debugf("[!] %q - %v", usernameline, err.Error())
 				continue
 			}
 			time.Sleep(time.Duration(delay) * time.Millisecond)
