@@ -5,11 +5,11 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/ropnop/gokrb5/iana/errorcode"
+	"github.com/ropnop/gokrb5/v8/iana/errorcode"
 
-	kclient "github.com/ropnop/gokrb5/client"
-	kconfig "github.com/ropnop/gokrb5/config"
-	"github.com/ropnop/gokrb5/messages"
+	kclient "github.com/ropnop/gokrb5/v8/client"
+	kconfig "github.com/ropnop/gokrb5/v8/config"
+	"github.com/ropnop/gokrb5/v8/messages"
 )
 
 const krb5ConfigTemplateDNS = `[libdefaults]
@@ -39,7 +39,7 @@ type KerbruteSession struct {
 func NewKerbruteSession(domain string, domainController string, verbose bool, safemode bool) (KerbruteSession, error) {
 	realm := strings.ToUpper(domain)
 	configstring := buildKrb5Template(realm, domainController)
-	Config, err := kconfig.NewConfigFromString(configstring)
+	Config, err := kconfig.NewFromString(configstring)
 	if err != nil {
 		panic(err)
 	}
@@ -72,23 +72,20 @@ func buildKrb5Template(realm, domainController string) string {
 }
 
 func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
-	Client := kclient.NewClientWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true))
+	Client := kclient.NewWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true))
 	defer Client.Destroy()
 	if ok, err := Client.IsConfigured(); !ok {
 		return false, err
 	}
 	err := Client.Login()
-	if err != nil {
-		if strings.Contains(err.Error(), "Password has expired") {
-			return true, nil
-		}
-		return false, err
+	if err == nil {
+		return true, err
 	}
-	return true, nil
+	return k.TestLoginError(err)
 }
 
 func (k KerbruteSession) TestUsername(username string) (bool, error) {
-	cl := kclient.NewClientWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
+	cl := kclient.NewWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
 
 	req, err := messages.NewASReqForTGT(cl.Credentials.Domain(), cl.Config, cl.Credentials.CName())
 	if err != nil {
@@ -114,35 +111,5 @@ func (k KerbruteSession) TestUsername(username string) (bool, error) {
 	}
 	// AS REP was valid, user therefore exists (don't bother trying to decrypt)
 	return true, err
-
-}
-
-func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
-	eString := err.Error()
-	if strings.Contains(eString, "Networking_Error: AS Exchange Error") {
-		return false, "NETWORK ERROR - Can't talk to KDC. Aborting..."
-	}
-	if strings.Contains(eString, "KDC_ERR_WRONG_REALM") {
-		return false, "KDC ERROR - Wrong Realm. Try adjusting the domain? Aborting..."
-	}
-	if strings.Contains(eString, "client does not have a username") {
-		return true, "Skipping blank username"
-	}
-	if strings.Contains(eString, "KDC_ERR_C_PRINCIPAL_UNKNOWN") {
-		return true, "User does not exist"
-	}
-	if strings.Contains(eString, "KDC_ERR_PREAUTH_FAILED") {
-		return true, "Invalid password"
-	}
-	if strings.Contains(eString, "KDC_ERR_CLIENT_REVOKED") {
-		if k.SafeMode {
-			return false, "USER LOCKED OUT and safe mode on! Aborting..."
-		}
-		return true, "USER LOCKED OUT"
-	}
-	if strings.Contains(eString, " AS_REP is not valid or client password/keytab incorrect") {
-		return true, "Got AS-REP (no pre-auth) but couldn't decrypt - bad password"
-	}
-	return true, eString
 
 }
