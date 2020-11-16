@@ -32,14 +32,15 @@ Lastly, Kerbrute has a `--safe` option. When this option is enabled, if an accou
 The `help` command can be used for more information
 
 ```
-$ ./kerbrute
+$ ./kerbrute -h
+
     __             __               __
    / /_____  _____/ /_  _______  __/ /____
   / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
  / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
 /_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/
 
-Version: dev (n/a) - 12/14/19 - Ronnie Flathers @ropnop
+Version: dev (bc1d606) - 11/15/20 - Ronnie Flathers @ropnop
 
 This tool is designed to assist in quickly bruteforcing valid Active Directory accounts through Kerberos Pre-Authentication.
 It is designed to be used on an internal Windows domain with access to one of the Domain Controllers.
@@ -57,14 +58,16 @@ Available Commands:
   version       Display version info and quit
 
 Flags:
-      --dc string       The location of the Domain Controller (KDC) to target. If blank, will lookup via DNS
-      --delay int       Delay in millisecond between each attempt. Will always use single thread if set
-  -d, --domain string   The full domain to use (e.g. contoso.com)
-  -h, --help            help for kerbrute
-  -o, --output string   File to write logs to. Optional.
-      --safe            Safe mode. Will abort if any user comes back as locked out. Default: FALSE
-  -t, --threads int     Threads to use (default 10)
-  -v, --verbose         Log failures and errors
+      --dc string          The location of the Domain Controller (KDC) to target. If blank, will lookup via DNS
+      --delay int          Delay in millisecond between each attempt. Will always use single thread if set
+  -d, --domain string      The full domain to use (e.g. contoso.com)
+      --downgrade          Force downgraded encryption type (arcfour-hmac-md5)
+      --hash-file string   File to save AS-REP hashes to (if any captured), otherwise just logged
+  -h, --help               help for kerbrute
+  -o, --output string      File to write logs to. Optional.
+      --safe               Safe mode. Will abort if any user comes back as locked out. Default: FALSE
+  -t, --threads int        Threads to use (default 10)
+  -v, --verbose            Log failures and errors
 
 Use "kerbrute [command] --help" for more information about a command.
 ```
