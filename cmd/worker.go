@@ -76,7 +76,11 @@ func testLogin(ctx context.Context, username string, password string) {
 	login := fmt.Sprintf("%v@%v:%v", username, domain, password)
 	if ok, err := kSession.TestLogin(username, password); ok {
 		atomic.AddInt32(&successes, 1)
-		logger.Log.Noticef("[+] VALID LOGIN:\t %s", login)
+		if err != nil { // it's a valid login, but there's an error we should display
+			logger.Log.Noticef("[+] VALID LOGIN WITH ERROR:\t %s\t (%s)", login, err)
+		} else {
+			logger.Log.Noticef("[+] VALID LOGIN:\t %s", login)
+		}
 		if stopOnSuccess {
 			cancel()
 		}
@@ -98,7 +102,12 @@ func testUsername(ctx context.Context, username string) {
 	valid, err := kSession.TestUsername(username)
 	if valid {
 		atomic.AddInt32(&successes, 1)
-		logger.Log.Noticef("[+] VALID USERNAME:\t %s", usernamefull)
+		if err != nil {
+			logger.Log.Noticef("[+] VALID USERNAME WITH ERROR:\t %s\t (%s)", username, err)
+		} else {
+			logger.Log.Noticef("[+] VALID USERNAME:\t %s", usernamefull)
+		}
+
 	} else if err != nil {
 		// This is to determine if the error is "okay" or if we should abort everything
 		ok, errorString := kSession.HandleKerbError(err)

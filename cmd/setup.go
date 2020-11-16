@@ -19,6 +19,10 @@ var (
 	threads          int
 	stopOnSuccess    bool
 	userAsPass       = false
+
+	downgrade bool
+	hashFileName string
+
 	logger           util.Logger
 	kSession         session.KerbruteSession
 
@@ -30,16 +34,21 @@ var (
 
 func setupSession(cmd *cobra.Command, args []string) {
 	logger = util.NewLogger(verbose, logFileName)
-	if domain == "" {
-		logger.Log.Error("No domain specified. You must specify a full domain")
-		os.Exit(1)
+	kOptions := session.KerbruteSessionOptions{
+		Domain:           domain,
+		DomainController: domainController,
+		Verbose:          verbose,
+		SafeMode:         safe,
+		HashFilename:     hashFileName,
+		Downgrade: downgrade,
 	}
-	var err error
-	kSession, err = session.NewKerbruteSession(domain, domainController, verbose, safe)
+	k, err := session.NewKerbruteSession(kOptions)
 	if err != nil {
-		logger.Log.Error(err.Error())
+		logger.Log.Error(err)
 		os.Exit(1)
 	}
+	kSession = k
+
 	logger.Log.Info("Using KDC(s):")
 	for _, v := range kSession.Kdcs {
 		logger.Log.Infof("\t%s\n", v)
