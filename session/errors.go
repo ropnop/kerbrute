@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -50,11 +51,11 @@ func (k KerbruteSession) TestLoginError(err error) (bool, error) {
 	eString := err.Error()
 	if strings.Contains(eString, "Password has expired") {
 		// user's password expired, but it's valid!
-		return true, err
+		return true, fmt.Errorf("User's password has expired")
 	}
 	if strings.Contains(eString, "Clock skew too great") {
 		// clock skew off, but that means password worked since PRE-AUTH was successful
-		return true, err
+		return true, fmt.Errorf("Clock skew is too great")
 	}
 	return false, err
 }
