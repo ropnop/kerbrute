@@ -2,13 +2,16 @@ package session
 
 import (
 	"fmt"
-	"github.com/ropnop/kerbrute/util"
 	"html/template"
 	"os"
 	"strings"
 
+	"github.com/ropnop/kerbrute/util"
+
 	"github.com/ropnop/gokrb5/v8/iana/errorcode"
 
+	"github.com/ropnop/gokrb5/iana/patype"
+	"github.com/ropnop/gokrb5/types"
 	kclient "github.com/ropnop/gokrb5/v8/client"
 	kconfig "github.com/ropnop/gokrb5/v8/config"
 	"github.com/ropnop/gokrb5/v8/messages"
@@ -36,18 +39,18 @@ type KerbruteSession struct {
 	Config       *kconfig.Config
 	Verbose      bool
 	SafeMode     bool
-	HashFile *os.File
-	Logger *util.Logger
+	HashFile     *os.File
+	Logger       *util.Logger
 }
 
 type KerbruteSessionOptions struct {
-	Domain string
+	Domain           string
 	DomainController string
-	Verbose bool
-	SafeMode bool
-	Downgrade bool
-	HashFilename string
-	logger *util.Logger
+	Verbose          bool
+	SafeMode         bool
+	Downgrade        bool
+	HashFilename     string
+	logger           *util.Logger
 }
 
 func NewKerbruteSession(options KerbruteSessionOptions) (k KerbruteSession, err error) {
@@ -92,7 +95,7 @@ func NewKerbruteSession(options KerbruteSessionOptions) (k KerbruteSession, err 
 		Config:       Config,
 		Verbose:      options.Verbose,
 		SafeMode:     options.SafeMode,
-		HashFile: hashFile,
+		HashFile:     hashFile,
 		Logger:       options.logger,
 	}
 	return k, err
@@ -132,7 +135,7 @@ func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
 	return success, err
 }
 
-func (k KerbruteSession) TestUsername(username string) (bool, error) {
+func (k KerbruteSession) TestUsername(username string) (string, error) {
 	// client here does NOT assume preauthentication (as opposed to the one in TestLogin)
 
 	cl := kclient.NewWithPassword(username, k.Realm, "foobar", k.Config, kclient.DisablePAFXFAST(true))
@@ -143,7 +146,7 @@ func (k KerbruteSession) TestUsername(username string) (bool, error) {
 	}
 	b, err := req.Marshal()
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	rb, err := cl.SendToKDC(b, k.Realm)
 
@@ -152,22 +155,50 @@ func (k KerbruteSession) TestUsername(username string) (bool, error) {
 		var ASRep messages.ASRep
 		err = ASRep.Unmarshal(rb)
 		if err != nil {
-			// something went wrong, it's not a valid response
-			return false, err
+			return "", err
 		}
 		k.DumpASRepHash(ASRep)
-		return true, nil
+		return "", nil
 	}
+
 	e, ok := err.(messages.KRBError)
 	if !ok {
-		return false, err
+		return "", err
 	}
+
+	var salt string = ""
+	var pas types.PADataSequence
+	saltErr := pas.Unmarshal(e.EData)
+	if saltErr == nil {
+		for _, pa := range pas {
+			switch pa.PADataType {
+			case patype.PA_PW_SALT:
+				salt = string(pa.PADataValue)
+			case patype.PA_ETYPE_INFO:
+				var eti types.ETypeInfo
+				saltErr = eti.Unmarshal(pa.PADataValue)
+				if saltErr == nil {
+					salt = string(eti[0].Salt)
+				}
+			case patype.PA_ETYPE_INFO2:
+				var et2 types.ETypeInfo2
+				saltErr = et2.Unmarshal(pa.PADataValue)
+				if saltErr == nil {
+					salt = et2[0].Salt
+				}
+			}
+		}
+	}
+
+	if salt != "" {
+		salt = strings.Replace(salt, strings.ToUpper((cl.Credentials.Domain())), "", 1)
+	}
+
 	switch e.ErrorCode {
 	case errorcode.KDC_ERR_PREAUTH_REQUIRED:
-		return true, nil
+		return salt, nil
 	default:
-		return false, err
-
+		return salt, err
 	}
 }
 
