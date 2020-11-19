@@ -168,20 +168,24 @@ func (k KerbruteSession) TestUsername(username string) (string, error) {
 
 	var salt string = ""
 	var pas types.PADataSequence
-	err = pas.Unmarshal(e.EData)
-	if err == nil {
+	saltErr := pas.Unmarshal(e.EData)
+	if saltErr == nil {
 		for _, pa := range pas {
 			switch pa.PADataType {
 			case patype.PA_PW_SALT:
 				salt = string(pa.PADataValue)
 			case patype.PA_ETYPE_INFO:
 				var eti types.ETypeInfo
-				err = eti.Unmarshal(pa.PADataValue)
-				salt = string(eti[0].Salt)
+				saltErr = eti.Unmarshal(pa.PADataValue)
+				if saltErr == nil {
+					salt = string(eti[0].Salt)
+				}
 			case patype.PA_ETYPE_INFO2:
 				var et2 types.ETypeInfo2
-				err = et2.Unmarshal(pa.PADataValue)
-				salt = et2[0].Salt
+				saltErr = et2.Unmarshal(pa.PADataValue)
+				if saltErr == nil {
+					salt = et2[0].Salt
+				}
 			}
 		}
 	}
