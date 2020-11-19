@@ -99,11 +99,12 @@ func testLogin(ctx context.Context, username string, password string) {
 func testUsername(ctx context.Context, username string) {
 	atomic.AddInt32(&counter, 1)
 	usernamefull := fmt.Sprintf("%v@%v", username, domain)
-	valid, err := kSession.TestUsername(username)
-	if valid {
+	realUsername, err := kSession.TestUsername(username)
+	if realUsername != "" {
+		usernamefull = fmt.Sprintf("%v@%v", realUsername, domain)
 		atomic.AddInt32(&successes, 1)
 		if err != nil {
-			logger.Log.Noticef("[+] VALID USERNAME WITH ERROR:\t %s\t (%s)", username, err)
+			logger.Log.Noticef("[+] VALID USERNAME WITH ERROR:\t %s\t (%s)", usernamefull, err)
 		} else {
 			logger.Log.Noticef("[+] VALID USERNAME:\t %s", usernamefull)
 		}
