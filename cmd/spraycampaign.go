@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
     "strconv"
+    "fmt"
 
 	"github.com/ropnop/kerbrute/util"
 
@@ -14,17 +15,19 @@ import (
 )
 
 var sprayCampaignCmd = &cobra.Command{
-	Use:   "spraycampaign [flags] <username_wordlist> <passwordfile> <time in millis between sweeps> <number of passwords per sweep>",
-	Short: "Test X passwords from a provided list of passwords every X millisseconds against a list of usernames",
-	Long: `Will perform a password spray attack against a list of users, iterating through a list of provided passwords. This is much like the passwordspray
-    command, however it allows for a specified delay between every X number of passwords at a time. This is Intended to allow for automated password spraying
-    campaigns to take place without fear of locking out accounts..
-    Like passwordspray this is using Kerberos Pre-Authentication by requesting a TGT from the KDC.
-If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
-A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
-Succesful logins will be displayed on stdout.
-WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
-	Args:   cobra.MinimumNArgs(1),
+	Use:   "spraycampaign [flags] <username_wordlist> <password_wordlist> <time in MINUTES between sweeps> <number of passwords per sweep>",
+	Short: "Tests X passwords from a provided list of passwords every X minute(s) against a list of usernames",
+	Long: `Will perform a password spray attack against a list of users, iterating through a list of passwords. This is much like the passwordspray
+    command, however it allows for a specified delay between every X number of passwords per sweep time. 
+    This is Intended to allow for automated password spraying campaigns to take place without fear of locking out accounts while alleviating the need
+    to keep restarting the spray with a new password.
+    Like passwordspray, this is using Kerberos Pre-Authentication by requesting a TGT from the KDC.
+    If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
+    A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
+    Succesful logins will be displayed on stdout.
+    Consider adding an additional minute or more to the domain password policy to prevent lockouts.
+    WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
+	Args:   cobra.MinimumNArgs(4),
 	PreRun: setupSession,
 	Run:    sprayCampaign,
 }
@@ -116,7 +119,7 @@ func sprayCampaign(cmd *cobra.Command, args []string) {
 
     triedThisSweep := 0
     for _,password := range passwords {
-        println("testing password:",password)
+        logger.Log.Info(fmt.Sprintf("Spraying password: %s",password))
         for _,username := range usernames {
             cred := [2]string{username,password}
             credChan <- cred
@@ -125,8 +128,8 @@ func sprayCampaign(cmd *cobra.Command, args []string) {
         triedThisSweep++
         if triedThisSweep >= maxPerSweep {
             triedThisSweep = 0
-            println("sleeping until next sweep...")
-            time.Sleep(time.Duration(campaignDelay) * time.Millisecond)
+            logger.Log.Info(fmt.Sprintf("Sleeping for %d minutes until next sweep\n",campaignDelay))
+            time.Sleep(time.Duration(campaignDelay) * (time.Millisecond * 1000 * 60))
         }
     }
 
