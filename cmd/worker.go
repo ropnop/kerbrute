@@ -32,11 +32,11 @@ func makeSprayWorkerCampaign(ctx context.Context, cred_set <-chan [2]string, wg 
 		select {
 		case <-ctx.Done():
 			break
-        case username, ok := <-cred_set:
+        case cred, ok := <-cred_set:
             if !ok {
                 return
             }
-            testLogin(ctx, username[0], username[1])
+            testLogin(ctx, cred[0], cred[1])
         }
     }
 }
