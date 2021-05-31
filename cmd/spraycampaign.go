@@ -26,7 +26,9 @@ var sprayCampaignCmd = &cobra.Command{
     A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
     Succesful logins will be displayed on stdout.
     Consider adding an additional minute or more to the domain password policy to prevent lockouts.
-    WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
+    WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts.
+    Added by @deadjakk
+    `,
 	Args:   cobra.MinimumNArgs(4),
 	PreRun: setupSession,
 	Run:    sprayCampaign,
