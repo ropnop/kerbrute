@@ -27,7 +27,7 @@ var sprayCampaignCmd = &cobra.Command{
     Succesful logins will be displayed on stdout.
     Consider adding an additional minute or more to the domain password policy to prevent lockouts.
     WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts.
-    Added by @deadjakk
+    Added by deadjakk@shell.rip
     `,
 	Args:   cobra.MinimumNArgs(4),
 	PreRun: setupSession,
