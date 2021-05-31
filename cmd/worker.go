@@ -8,22 +8,37 @@ import (
 )
 
 func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitGroup, password string, userAsPass bool) {
+    defer wg.Done()
+    for {
+        select {
+        case <-ctx.Done():
+            break
+        case username, ok := <-usernames:
+            if !ok {
+                return
+            }
+            if userAsPass {
+                testLogin(ctx, username, username)
+            } else {
+                testLogin(ctx, username, password)
+            }
+        }
+    }
+}
+
+func makeSprayWorkerCampaign(ctx context.Context, cred_set <-chan [2]string, wg *sync.WaitGroup, userAsPass bool) {
 	defer wg.Done()
 	for {
 		select {
 		case <-ctx.Done():
 			break
-		case username, ok := <-usernames:
-			if !ok {
-				return
-			}
-			if userAsPass {
-				testLogin(ctx, username, username)
-			} else {
-				testLogin(ctx, username, password)
-			}
-		}
-	}
+        case username, ok := <-cred_set:
+            if !ok {
+                return
+            }
+            testLogin(ctx, username[0], username[1])
+        }
+    }
 }
 
 func makeBruteWorker(ctx context.Context, passwords <-chan string, wg *sync.WaitGroup, username string) {
