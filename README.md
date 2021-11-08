@@ -10,7 +10,7 @@ This tool grew out of some [bash scripts](https://github.com/ropnop/kerberos_win
 
 Bruteforcing Windows passwords with Kerberos is much faster than any other approach I know of, and potentially stealthier since pre-authentication failures do not trigger that "traditional" `An account failed to log on` event 4625. With Kerberos, you can validate a username or test a login by only sending one UDP frame to the KDC (Domain Controller)
 
-For more background and information, check out my Troopers 2019 talk, Fun with LDAP and Kerberos (link TBD)
+For more background and information, check out my Troopers 2019 talk, [Fun with LDAP and Kerberos](https://files.speakerdeck.com/presentations/1ddba788017347ff8cfdb3336204fd17/FunWithLDAPandKerberos_Flathers_Thotcon2018_05052018.pdf)
 
 ## Usage
 Kerbrute has three main commands:
