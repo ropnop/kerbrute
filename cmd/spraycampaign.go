@@ -26,6 +26,8 @@ var sprayCampaignCmd = &cobra.Command{
     A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
     Succesful logins will be displayed on stdout.
     Consider adding an additional minute or more to the domain password policy to prevent lockouts.
+    Any new passwords can be added to the provided password file after starting kerbrute, the provided file will be checked for
+    any new passwords at the end of every password sweep.
     WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts.
     Added by deadjakk@shell.rip
     `,
@@ -89,24 +91,23 @@ func sprayCampaign(cmd *cobra.Command, args []string) {
 
 	start := time.Now()
 
-    // read passwords 
-    var passwords []string
-    var password_scanner *bufio.Scanner
-    passfile, err := os.Open(passwordfile)
+    var passwords_to_try []string
+    var passwords_tried  []string
+
+    // read passwords and updates the list
+    passwords_to_try,err = util.GetPasswords(passwordfile,passwords_to_try,passwords_tried,false,&logger)
 
     if err != nil {
         logger.Log.Error(err.Error())
         return
     }
-    defer passfile.Close()
 
-    password_scanner = bufio.NewScanner(passfile)
-
-    for password_scanner.Scan() {
-        passwordline := password_scanner.Text()
-        passwords=append(passwords,passwordline)
+    if len(passwords_to_try) == 0 {
+        logger.Log.Error("[-] No passwords present in provided file")
+        return
+    } else {
+        logger.Log.Debugf("[*] %d Passwords loaded",len(passwords_to_try))
     }
-
     // read the usernames
     var usernames []string
 	for scanner.Scan() {
@@ -120,17 +121,25 @@ func sprayCampaign(cmd *cobra.Command, args []string) {
 	}
 
     triedThisSweep := 0
-    for _,password := range passwords {
-        logger.Log.Info(fmt.Sprintf("Spraying password: %s",password))
+    //for _,password := range passwords_to_try {
+    for {
+        password, passwords_to_try = passwords_to_try[0], passwords_to_try[1:]
+        logger.Log.Infof("[*] Spraying password: %s",password)
         for _,username := range usernames {
             cred := [2]string{username,password}
             credChan <- cred
+            passwords_tried=append(passwords_tried,password)
             time.Sleep(time.Duration(delay) * time.Millisecond)
         }
         triedThisSweep++
+        // updates any new passwords that have been added to the file
+        passwords_to_try,err = util.GetPasswords(passwordfile,passwords_to_try,passwords_tried,true,&logger)
+        if len (passwords_to_try) == 0 {
+            break
+        }
         if triedThisSweep >= maxPerSweep {
             triedThisSweep = 0
-            logger.Log.Info(fmt.Sprintf("Sleeping for %d minutes until next sweep\n",campaignDelay))
+            logger.Log.Info(fmt.Sprintf("[*] Sleeping for %d minutes until next sweep\n",campaignDelay))
             time.Sleep(time.Duration(campaignDelay) * (time.Millisecond * 1000 * 60))
         }
     }
@@ -140,7 +149,7 @@ func sprayCampaign(cmd *cobra.Command, args []string) {
 
 	finalCount := atomic.LoadInt32(&counter)
 	finalSuccess := atomic.LoadInt32(&successes)
-	logger.Log.Infof("Done! Tested %d logins (%d successes) in %.3f seconds", finalCount, finalSuccess, time.Since(start).Seconds())
+	logger.Log.Infof("[*] Done! Tested %d logins (%d successes) in %.3f seconds", finalCount, finalSuccess, time.Since(start).Seconds())
 
 	if err := scanner.Err(); err != nil {
 		logger.Log.Error(err.Error())
