@@ -1,6 +1,6 @@
 TARGET=./dist
-ARCHS=amd64 386 
-GOOS=windows linux darwin
+ARCHS=amd64 386
+GOOS=windows linux darwin openbsd
 PACKAGENAME="github.com/ropnop/kerbrute"
 
 COMMIT=`git rev-parse --short HEAD`
@@ -19,7 +19,7 @@ LDFLAGS="-X ${PACKAGENAME}/util.GitCommit=${COMMIT} \
 -X ${PACKAGENAME}/util.Version=${VERSION} \
 "
 
-.PHONY: help windows linux mac all clean
+.PHONY: help windows linux mac openbsd all clean
 
 help:           ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
@@ -38,6 +38,13 @@ linux: ## Make Linux x86 and x64 Binaries
 	done; \
 	echo "Done."
 
+openbsd: ## Make OpenBSD x86 and x64 Binaries
+	@for ARCH in ${ARCHS}; do \
+		echo "Building for openbsd $${ARCH}..." ; \
+		GOOS=openbsd GOARCH=$${ARCH} go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_openbsd_$${ARCH} || exit 1 ;\
+	done; \
+	echo "Done."
+
 mac: ## Make Darwin (Mac) x86 and x64 Binaries
 	@for ARCH in ${ARCHS}; do \
 		echo "Building for mac $${ARCH}..." ; \
@@ -50,7 +57,5 @@ clean: ## Delete any binaries
 	go clean -i -n github.com/ropnop/kerbrute ; \
 	echo "Done."
 
-all: ## Make Windows, Linux and Mac x86/x64 Binaries
-all: clean windows linux mac
-
-
+all: ## Make Windows, Linux, OpenBSD and Mac x86/x64 Binaries
+all: clean windows linux openbsd mac
