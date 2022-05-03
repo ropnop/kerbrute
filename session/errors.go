@@ -21,7 +21,7 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 
 	// handle KRB errors
 	if strings.Contains(eString, "KDC_ERR_WRONG_REALM") {
-		return false, "KDC ERROR - Wrong Realm. Try adjusting the domain? Aborting..."
+		return true, "KDC ERROR - Wrong Realm. Try adjusting the domain?"
 	}
 	if strings.Contains(eString, "KDC_ERR_C_PRINCIPAL_UNKNOWN") {
 		return true, "User does not exist"
@@ -41,6 +41,9 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	if strings.Contains(eString, "KRB_AP_ERR_SKEW Clock skew too great") {
 		return true, "Clock skew too great"
 	}
+	if strings.Contains(eString, " KDC_Error: AS Exchange Error") {
+		return true, "2FA Enabled"
+}
 
 	return false, eString
 }
