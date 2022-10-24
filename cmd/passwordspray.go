@@ -68,7 +68,6 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	} else {
 		scanner = bufio.NewScanner(os.Stdin)
 	}
-	
 
 	for i := 0; i < threads; i++ {
 		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass)
