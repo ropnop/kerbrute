@@ -36,6 +36,7 @@ type KerbruteSession struct {
 	Config       *kconfig.Config
 	Verbose      bool
 	SafeMode     bool
+	SemiSafeMode	int
 	HashFile *os.File
 	Logger *util.Logger
 }
@@ -45,6 +46,7 @@ type KerbruteSessionOptions struct {
 	DomainController string
 	Verbose bool
 	SafeMode bool
+	SemiSafeMode	int
 	Downgrade bool
 	HashFilename string
 	logger *util.Logger
@@ -92,6 +94,7 @@ func NewKerbruteSession(options KerbruteSessionOptions) (k KerbruteSession, err 
 		Config:       Config,
 		Verbose:      options.Verbose,
 		SafeMode:     options.SafeMode,
+		SemiSafeMode:	options.SemiSafeMode,
 		HashFile: hashFile,
 		Logger:       options.logger,
 	}

@@ -28,6 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&logFileName, "output", "o", "", "File to write logs to. Optional.")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Log failures and errors")
 	rootCmd.PersistentFlags().BoolVar(&safe, "safe", false, "Safe mode. Will abort if any user comes back as locked out. Default: FALSE")
+	rootCmd.PersistentFlags().IntVarP(&semiSafe, "semisafe", "", 0, "Semi-Safe mode. Will abort if more than N accounts are locked out. 0 (default) to disable")
 	rootCmd.PersistentFlags().IntVarP(&threads, "threads", "t", 10, "Threads to use")
 	rootCmd.PersistentFlags().IntVarP(&delay, "delay", "", 0, "Delay in millisecond between each attempt. Will always use single thread if set")
 	rootCmd.PersistentFlags().BoolVar(&downgrade, "downgrade", false, "Force downgraded encryption type (arcfour-hmac-md5)")

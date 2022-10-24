@@ -3,7 +3,10 @@ package session
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 )
+
+var LOCKOUTS int64 = 0
 
 func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	eString := err.Error()
@@ -32,6 +35,11 @@ func (k KerbruteSession) HandleKerbError(err error) (bool, string) {
 	if strings.Contains(eString, "KDC_ERR_CLIENT_REVOKED") {
 		if k.SafeMode {
 			return false, "USER LOCKED OUT and safe mode on! Aborting..."
+		} else if k.SemiSafeMode > 0 {
+			var _lockout int64 = atomic.AddInt64(&LOCKOUTS, 1)
+			if _lockout >= int64(k.SemiSafeMode) {
+				return false, "TOO MANY USERS LOCKED OUT and Semi-Safe mode on! Aborting..."
+			}
 		}
 		return true, "USER LOCKED OUT"
 	}
