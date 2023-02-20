@@ -15,16 +15,17 @@ var (
 	logFileName      string
 	verbose          bool
 	safe             bool
+	semiSafe         int
 	delay            int
 	threads          int
 	stopOnSuccess    bool
 	userAsPass       = false
 
-	downgrade bool
+	downgrade    bool
 	hashFileName string
 
-	logger           util.Logger
-	kSession         session.KerbruteSession
+	logger   util.Logger
+	kSession session.KerbruteSession
 
 	// Used for multithreading
 	ctx, cancel = context.WithCancel(context.Background())
@@ -39,8 +40,9 @@ func setupSession(cmd *cobra.Command, args []string) {
 		DomainController: domainController,
 		Verbose:          verbose,
 		SafeMode:         safe,
+		SemiSafeMode:     semiSafe,
 		HashFilename:     hashFileName,
-		Downgrade: downgrade,
+		Downgrade:        downgrade,
 	}
 	k, err := session.NewKerbruteSession(kOptions)
 	if err != nil {
