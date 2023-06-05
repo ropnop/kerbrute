@@ -1,5 +1,5 @@
 TARGET=./dist
-ARCHS=amd64 386 
+ARCHS=amd64 386
 GOOS=windows linux darwin
 PACKAGENAME="github.com/ropnop/kerbrute"
 
@@ -36,6 +36,16 @@ linux: ## Make Linux x86 and x64 Binaries
 		echo "Building for linux $${ARCH}..." ; \
 		GOOS=linux GOARCH=$${ARCH} go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_$${ARCH} || exit 1 ;\
 	done; \
+	echo "Done."
+
+arm64: ## Make Linux arm64 Binary
+	echo "Building for arm64..." ; \
+	GOOS=linux GOARCH=arm64 go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_arm64 || exit 1 ;\
+	echo "Done."
+
+arm: ## Make Linux arm Binary
+	echo "Building for arm..." ; \
+	GOOS=linux GOARCH=arm go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_arm || exit 1 ;\
 	echo "Done."
 
 mac: ## Make Darwin (Mac) x86 and x64 Binaries
