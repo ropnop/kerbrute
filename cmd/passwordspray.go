@@ -18,7 +18,7 @@ var password string
 // var userAsPass bool
 
 var passwordSprayCmd = &cobra.Command{
-	Use:   "passwordspray [flags] <username_wordlist> <password>",
+	Use:   "passwordspray [flags] <username_wordlist> <password_or_hash>",
 	Short: "Test a single password against a list of users",
 	Long: `Will perform a password spray attack against a list of users using Kerberos Pre-Authentication by requesting a TGT from the KDC.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
@@ -32,6 +32,12 @@ WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`
 
 func init() {
 	passwordSprayCmd.Flags().BoolVar(&userAsPass, "user-as-pass", false, "Spray every account with the username as the password")
+	passwordSprayCmd.Flags().StringVar(&encryptionType, "etype", "", `Specify an encryption type to use. If not specified, password(s) will be considered plaintext.
+Some of the Valid encryption types:
+rc4-hmac (NTLM)
+aes128-cts-hmac-sha1-96
+aes256-cts-hmac-sha1-96
+des-cbc-md5`)
 	rootCmd.AddCommand(passwordSprayCmd)
 
 }
@@ -68,10 +74,9 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	} else {
 		scanner = bufio.NewScanner(os.Stdin)
 	}
-	
 
 	for i := 0; i < threads; i++ {
-		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass)
+		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass, encryptionType)
 	}
 
 	start := time.Now()

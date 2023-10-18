@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 )
 
-func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitGroup, password string, userAsPass bool) {
+func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitGroup, password string, userAsPass bool, encryptionType string) {
 	defer wg.Done()
 	for {
 		select {
@@ -18,15 +18,15 @@ func makeSprayWorker(ctx context.Context, usernames <-chan string, wg *sync.Wait
 				return
 			}
 			if userAsPass {
-				testLogin(ctx, username, username)
+				testLogin(ctx, username, username, encryptionType)
 			} else {
-				testLogin(ctx, username, password)
+				testLogin(ctx, username, password, encryptionType)
 			}
 		}
 	}
 }
 
-func makeBruteWorker(ctx context.Context, passwords <-chan string, wg *sync.WaitGroup, username string) {
+func makeBruteWorker(ctx context.Context, passwords <-chan string, wg *sync.WaitGroup, username string, encryptionType string) {
 	defer wg.Done()
 	for {
 		select {
@@ -36,7 +36,7 @@ func makeBruteWorker(ctx context.Context, passwords <-chan string, wg *sync.Wait
 			if !ok {
 				return
 			}
-			testLogin(ctx, username, password)
+			testLogin(ctx, username, password, encryptionType)
 		}
 	}
 }
@@ -56,7 +56,7 @@ func makeEnumWorker(ctx context.Context, usernames <-chan string, wg *sync.WaitG
 	}
 }
 
-func makeBruteComboWorker(ctx context.Context, combos <-chan [2]string, wg *sync.WaitGroup) {
+func makeBruteComboWorker(ctx context.Context, combos <-chan [2]string, wg *sync.WaitGroup, encryptionType string) {
 	defer wg.Done()
 	for {
 		select {
@@ -66,15 +66,15 @@ func makeBruteComboWorker(ctx context.Context, combos <-chan [2]string, wg *sync
 			if !ok {
 				return
 			}
-			testLogin(ctx, combo[0], combo[1])
+			testLogin(ctx, combo[0], combo[1], encryptionType)
 		}
 	}
 }
 
-func testLogin(ctx context.Context, username string, password string) {
+func testLogin(ctx context.Context, username string, password string, encryptionType string) {
 	atomic.AddInt32(&counter, 1)
 	login := fmt.Sprintf("%v@%v:%v", username, domain, password)
-	if ok, err := kSession.TestLogin(username, password); ok {
+	if ok, err := kSession.TestLogin(username, password, encryptionType); ok {
 		atomic.AddInt32(&successes, 1)
 		if err != nil { // it's a valid login, but there's an error we should display
 			logger.Log.Noticef("[+] VALID LOGIN WITH ERROR:\t %s\t (%s)", login, err)
