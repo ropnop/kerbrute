@@ -158,7 +158,15 @@ Version: dev (n/a) - 05/11/19 - Ronnie Flathers @ropnop
 ```
 
 ## Installing
-You can download pre-compiled binaries for Linux, Windows and Mac from the [releases page](https://github.com/ropnop/kerbrute/releases/tag/latest). If you want to live on the edge, you can also install with Go:
+You can download pre-compiled binaries for Linux, Windows and Mac from the [releases page](https://github.com/ropnop/kerbrute/releases/tag/latest).
+
+If you want to live on the edge, you can also install with Go:
+
+```
+go install github.com/ropnop/kerbrute@latest
+```
+
+Or clone the repository:
 
 ```
 $ go get github.com/ropnop/kerbrute
