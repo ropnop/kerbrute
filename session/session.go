@@ -125,7 +125,7 @@ func (k KerbruteSession) TestLogin(username, password string, etypeName string) 
 	if etypeName != "" {
 		kt := keytab.New()
 		ts := time.Now()
-		kt.AddEntryWithHash(username, k.Realm, password, ts, 2, etypeID.RC4_HMAC)
+		kt.AddEntryWithHash(username, k.Realm, password, ts, 2, etypeID.ETypesByName[etypeName])
 
 		k.Config.LibDefaults.DefaultTktEnctypes = []string{etypeName}
 		k.Config.LibDefaults.DefaultTktEnctypeIDs = []int32{etypeID.ETypesByName[etypeName]}
