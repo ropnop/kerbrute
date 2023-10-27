@@ -14,7 +14,7 @@ import (
 // bruteuserCmd represents the bruteuser command
 var bruteForceCmd = &cobra.Command{
 	Use:   "bruteforce [flags] <user_pw_file>",
-	Short: "Bruteforce username:password combos, from a file or stdin",
+	Short: "Bruteforce username:password_or_hash combos, from a file or stdin",
 	Long: `Will read username and password combos from a file or stdin (format username:password) and perform a bruteforce attack using Kerberos Pre-Authentication by requesting at TGT from the KDC. Any succesful combinations will be displayed.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
@@ -25,6 +25,12 @@ WARNING: failed guesses will count against the lockout threshold`,
 }
 
 func init() {
+	bruteForceCmd.Flags().StringVar(&encryptionType, "etype", "", `Specify an encryption type to use. If not specified, password(s) will be considered plaintext.
+Some of the Valid encryption types:
+rc4-hmac (NTLM)
+aes128-cts-hmac-sha1-96
+aes256-cts-hmac-sha1-96
+des-cbc-md5`)
 	rootCmd.AddCommand(bruteForceCmd)
 }
 
@@ -52,7 +58,7 @@ func bruteForceCombos(cmd *cobra.Command, args []string) {
 	}
 
 	for i := 0; i < threads; i++ {
-		go makeBruteComboWorker(ctx, combosChan, &wg)
+		go makeBruteComboWorker(ctx, combosChan, &wg, encryptionType)
 	}
 
 	start := time.Now()

@@ -2,16 +2,18 @@ package session
 
 import (
 	"fmt"
-	"github.com/ropnop/kerbrute/util"
 	"html/template"
 	"os"
 	"strings"
-
-	"github.com/ropnop/gokrb5/v8/iana/errorcode"
+	"time"
 
 	kclient "github.com/ropnop/gokrb5/v8/client"
 	kconfig "github.com/ropnop/gokrb5/v8/config"
+	"github.com/ropnop/gokrb5/v8/iana/errorcode"
+	"github.com/ropnop/gokrb5/v8/iana/etypeID"
+	keytab "github.com/ropnop/gokrb5/v8/keytab"
 	"github.com/ropnop/gokrb5/v8/messages"
+	"github.com/ropnop/kerbrute/util"
 )
 
 const krb5ConfigTemplateDNS = `[libdefaults]
@@ -36,18 +38,18 @@ type KerbruteSession struct {
 	Config       *kconfig.Config
 	Verbose      bool
 	SafeMode     bool
-	HashFile *os.File
-	Logger *util.Logger
+	HashFile     *os.File
+	Logger       *util.Logger
 }
 
 type KerbruteSessionOptions struct {
-	Domain string
+	Domain           string
 	DomainController string
-	Verbose bool
-	SafeMode bool
-	Downgrade bool
-	HashFilename string
-	logger *util.Logger
+	Verbose          bool
+	SafeMode         bool
+	Downgrade        bool
+	HashFilename     string
+	logger           *util.Logger
 }
 
 func NewKerbruteSession(options KerbruteSessionOptions) (k KerbruteSession, err error) {
@@ -92,7 +94,7 @@ func NewKerbruteSession(options KerbruteSessionOptions) (k KerbruteSession, err 
 		Config:       Config,
 		Verbose:      options.Verbose,
 		SafeMode:     options.SafeMode,
-		HashFile: hashFile,
+		HashFile:     hashFile,
 		Logger:       options.logger,
 	}
 	return k, err
@@ -118,8 +120,22 @@ func buildKrb5Template(realm, domainController string) string {
 	return builder.String()
 }
 
-func (k KerbruteSession) TestLogin(username, password string) (bool, error) {
-	Client := kclient.NewWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true))
+func (k KerbruteSession) TestLogin(username, password string, etypeName string) (bool, error) {
+	var Client *kclient.Client = nil
+	if etypeName != "" {
+		kt := keytab.New()
+		ts := time.Now()
+		kt.AddEntryWithHash(username, k.Realm, password, ts, 2, etypeID.ETypesByName[etypeName])
+
+		k.Config.LibDefaults.DefaultTktEnctypes = []string{etypeName}
+		k.Config.LibDefaults.DefaultTktEnctypeIDs = []int32{etypeID.ETypesByName[etypeName]}
+		k.Config.LibDefaults.DefaultTGSEnctypes = []string{etypeName}
+		k.Config.LibDefaults.DefaultTGSEnctypeIDs = []int32{etypeID.ETypesByName[etypeName]}
+
+		Client = kclient.NewWithKeytab(username, k.Realm, kt, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true), kclient.SetpreAuthEType(etypeID.ETypesByName[etypeName]))
+	} else {
+		Client = kclient.NewWithPassword(username, k.Realm, password, k.Config, kclient.DisablePAFXFAST(true), kclient.AssumePreAuthentication(true))
+	}
 	defer Client.Destroy()
 	if ok, err := Client.IsConfigured(); !ok {
 		return false, err
