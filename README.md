@@ -166,7 +166,7 @@ $ go get github.com/ropnop/kerbrute
 
 With the repository cloned, you can also use the Make file to compile for common architectures:
 
-```
+```bash
 $ make help
 help:            Show this help.
 windows:  Make Windows x86 and x64 Binaries
@@ -190,6 +190,15 @@ Done.
 $ ls dist/
 kerbrute_darwin_386        kerbrute_linux_386         kerbrute_windows_386.exe
 kerbrute_darwin_amd64      kerbrute_linux_amd64       kerbrute_windows_amd64.exe
+```
+
+### Installing on ARM
+With the repository cloned, you can use `go` to compile for ARM architectures:
+
+```bash
+GOARCH=arm64 go build -o kerbrute-arm64 main.go
+
+GOOS=darwin GOARCH=arm64 go build -o kerbrute-arm64-darwin main.go
 ```
 
 ## Credits
