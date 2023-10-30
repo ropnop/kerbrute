@@ -193,7 +193,11 @@ kerbrute_darwin_amd64      kerbrute_linux_amd64       kerbrute_windows_amd64.exe
 ```
 
 ### Installing on ARM
-With the repository cloned, you can use `go` to compile for ARM architectures:
+```bash
+go install github.com/ropnop/kerbrute@latest
+```
+
+Or with the repository cloned, you can also use `go` to compile for ARM architectures:
 
 ```bash
 GOARCH=arm64 go build -o kerbrute-arm64 main.go
