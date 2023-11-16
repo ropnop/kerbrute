@@ -15,7 +15,7 @@ import (
 var bruteForceCmd = &cobra.Command{
 	Use:   "bruteforce [flags] <user_pw_file>",
 	Short: "Bruteforce username:password combos, from a file or stdin",
-	Long: `Will read username and password combos from a file or stdin (format username:password) and perform a bruteforce attack using Kerberos Pre-Authentication by requesting at TGT from the KDC. Any succesful combinations will be displayed.
+	Long: `Will read username and password combos from a file or stdin (format username:password) and perform a bruteforce attack using Kerberos Pre-Authentication by requesting at TGT from the KDC. Any successful combinations will be displayed.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
 WARNING: failed guesses will count against the lockout threshold`,
