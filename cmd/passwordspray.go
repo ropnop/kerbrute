@@ -23,7 +23,7 @@ var passwordSprayCmd = &cobra.Command{
 	Long: `Will perform a password spray attack against a list of users using Kerberos Pre-Authentication by requesting a TGT from the KDC.
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
-Succesful logins will be displayed on stdout.
+Successful logins will be displayed on stdout.
 WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
 	Args:   cobra.MinimumNArgs(1),
 	PreRun: setupSession,
