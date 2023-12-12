@@ -15,7 +15,7 @@ For more background and information, check out my Troopers 2019 talk, Fun with L
 ## Usage
 Kerbrute has three main commands:
  * **bruteuser** - Bruteforce a single user's password from a wordlist
- * **bruteforce** - Read username:password combos from a file or stdin and test them
+ * **bruteforce** - Read username:password combos from a file or stdin or usernames and passwords line by line from two files and test them
  * **passwordspray** - Test a single password against a list of users
  * **userenum** - Enumerate valid domain usernames via Kerberos
 
@@ -50,7 +50,7 @@ Usage:
   kerbrute [command]
 
 Available Commands:
-  bruteforce    Bruteforce username:password combos, from a file or stdin
+  bruteforce    Bruteforce username:password combos, from one or two files or stdin
   bruteuser     Bruteforce a single user's password from a wordlist
   help          Help about any command
   passwordspray Test a single password against a list of users
@@ -138,9 +138,27 @@ Version: dev (43f9ca1) - 03/06/19 - Ronnie Flathers @ropnop
 ```
 
 ### Brute Force
-This mode simply reads username and password combinations (in the format `username:password`) from a file or from `stdin` and tests them with Kerberos PreAuthentication. It will skip any blank lines or lines with blank usernames/passwords. This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
+This mode simply reads username and password combinations (in the format `username:password`) from a file or from `stdin` or usernames and passwords line by line from two files and tests them with Kerberos PreAuthentication. It will skip any blank lines or lines with blank usernames/passwords. This will generate both event IDs [4768 - A Kerberos authentication ticket (TGT) was requested](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) and [4771 - Kerberos pre-authentication failed](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4771)
 ```
-$ cat combos.lst | ./kerbrute -d lab.ropnop.com bruteforce -
+$ cat combos.lst | ./kerbrute -d lab.ropnop.com bruteforce
+
+    __             __               __
+   / /_____  _____/ /_  _______  __/ /____
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/
+
+Version: dev (n/a) - 05/11/19 - Ronnie Flathers @ropnop
+
+2019/05/11 18:40:56 >  Using KDC(s):
+2019/05/11 18:40:56 >   pdc01.lab.ropnop.com:88
+
+2019/05/11 18:40:56 >  [+] VALID LOGIN:  athomas@lab.ropnop.com:Password1234
+2019/05/11 18:40:56 >  Done! Tested 7 logins (1 successes) in 0.114 seconds
+
+
+
+$ ./kerbrute -d lab.ropnop.com bruteforce users.txt passwords.txt
 
     __             __               __
    / /_____  _____/ /_  _______  __/ /____
