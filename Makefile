@@ -1,5 +1,5 @@
 TARGET=./dist
-ARCHS=amd64 386 
+ARCHS=amd64 386 arm64
 GOOS=windows linux darwin
 PACKAGENAME="github.com/ropnop/kerbrute"
 
