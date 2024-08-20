@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"math/rand/v2"
 
 	"github.com/ropnop/kerbrute/util"
 
@@ -88,7 +89,7 @@ Scan:
 				logger.Log.Debugf("[!] %q - %v", usernameline, err.Error())
 				continue
 			}
-			time.Sleep(time.Duration(delay) * time.Millisecond)
+			time.Sleep(time.Duration(delay + rand.IntN(jitter)) * time.Millisecond)
 			usersChan <- username
 		}
 	}

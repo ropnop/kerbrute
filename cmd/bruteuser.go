@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"math/rand/v2"
 
 	"github.com/ropnop/kerbrute/util"
 
@@ -72,7 +73,7 @@ Scan:
 			break Scan
 		default:
 			password = scanner.Text()
-			time.Sleep(time.Duration(delay) * time.Millisecond)
+			time.Sleep(time.Duration(delay + rand.IntN(jitter)) * time.Millisecond)
 			passwordsChan <- password
 		}
 	}
