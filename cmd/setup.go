@@ -41,6 +41,7 @@ func setupSession(cmd *cobra.Command, args []string) {
 		SafeMode:         safe,
 		HashFilename:     hashFileName,
 		Downgrade: downgrade,
+		logger: logger
 	}
 	k, err := session.NewKerbruteSession(kOptions)
 	if err != nil {
