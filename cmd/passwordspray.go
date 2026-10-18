@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -25,28 +26,60 @@ If no domain controller is specified, the tool will attempt to look one up via D
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
 Succesful logins will be displayed on stdout.
 WARNING: use with caution - failed Kerberos pre-auth can cause account lockouts`,
-	Args:   cobra.MinimumNArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		cleaned := cleanArgs(args)
+		if len(cleaned) < 1 {
+			return fmt.Errorf("requires at least 1 arg(s), only received %d", len(cleaned))
+		}
+		return nil
+	},
 	PreRun: setupSession,
 	Run:    passwordSpray,
 }
 
 func init() {
 	passwordSprayCmd.Flags().BoolVar(&userAsPass, "user-as-pass", false, "Spray every account with the username as the password")
+	passwordSprayCmd.Flags().SetInterspersed(false)
 	rootCmd.AddCommand(passwordSprayCmd)
 
 }
 
-func passwordSpray(cmd *cobra.Command, args []string) {
-	usernamelist := args[0]
-	if !userAsPass {
-		if len(args) != 2 {
-			logger.Log.Error("You must specify a password to spray with, or --user-as-pass")
-			os.Exit(1)
+func parsePasswordSprayArgs(args []string, userAsPass bool) (userList string, pass string, asPass bool, err error) {
+	hasDashDash := false
+	for _, a := range args {
+		if a == "--" {
+			hasDashDash = true
+			break
+		}
+	}
+	cleaned := cleanArgs(args)
+	if len(cleaned) < 1 {
+		return "", "", false, fmt.Errorf("requires at least 1 arg(s), only received %d", len(cleaned))
+	}
+	userList = cleaned[0]
+	asPass = userAsPass
+	if !asPass {
+		if len(cleaned) == 2 && cleaned[1] == "--user-as-pass" && !hasDashDash {
+			asPass = true
+			pass = "foobar"
+		} else if len(cleaned) != 2 {
+			return "", "", false, fmt.Errorf("You must specify a password to spray with, or --user-as-pass")
 		} else {
-			password = args[1]
+			pass = cleaned[1]
 		}
 	} else {
-		password = "foobar" //it doesn't matter, won't use it
+		pass = "foobar" // it doesn't matter, won't use it
+	}
+	return userList, pass, asPass, nil
+}
+
+func passwordSpray(cmd *cobra.Command, args []string) {
+	var err error
+	var usernamelist string
+	usernamelist, password, userAsPass, err = parsePasswordSprayArgs(args, userAsPass)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		os.Exit(1)
 	}
 	stopOnSuccess = false
 

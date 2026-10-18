@@ -37,3 +37,13 @@ func init() {
 	}
 
 }
+
+func cleanArgs(args []string) []string {
+	var cleaned []string
+	for _, a := range args {
+		if a != "--" {
+			cleaned = append(cleaned, a)
+		}
+	}
+	return cleaned
+}

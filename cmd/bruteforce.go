@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -19,16 +20,24 @@ var bruteForceCmd = &cobra.Command{
 If no domain controller is specified, the tool will attempt to look one up via DNS SRV records.
 A full domain is required. This domain will be capitalized and used as the Kerberos realm when attempting the bruteforce.
 WARNING: failed guesses will count against the lockout threshold`,
-	Args:   cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		cleaned := cleanArgs(args)
+		if len(cleaned) != 1 {
+			return fmt.Errorf("accepts 1 arg(s), received %d", len(cleaned))
+		}
+		return nil
+	},
 	PreRun: setupSession,
 	Run:    bruteForceCombos,
 }
 
 func init() {
+	bruteForceCmd.Flags().SetInterspersed(false)
 	rootCmd.AddCommand(bruteForceCmd)
 }
 
 func bruteForceCombos(cmd *cobra.Command, args []string) {
+	args = cleanArgs(args)
 	combolist := args[0]
 	stopOnSuccess = false
 
