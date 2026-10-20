@@ -75,6 +75,10 @@ Use "kerbrute [command] --help" for more information about a command.
 ### User Enumeration
 To enumerate usernames, Kerbrute sends TGT requests with no pre-authentication. If the KDC responds with a `PRINCIPAL UNKNOWN` error, the username does not exist. However, if the KDC prompts for pre-authentication, we know the username exists and we move on. This does not cause any login failures so it will not lock out any accounts. This generates a Windows event ID [4768](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=4768) if Kerberos logging is enabled.
 
+If the KDC returns an AS-REP, Kerbrute reports that the account does not require pre-authentication. It exports etype 23 (RC4-HMAC), etype 17 (AES128), and etype 18 (AES256) AS-REPs in hashcat format, printing the hash and saving it when `--hash-file` is set. Use hashcat mode 18200 for etype 23, 32100 for etype 17, and 32200 for etype 18. The AES AS-REP modes require [hashcat 7.0.0 or later](https://github.com/hashcat/hashcat/blob/master/docs/releases_notes_v7.0.0.md).
+
+The RC4 export splits off its first 16 bytes as the checksum. AES export uses the last 12 bytes as the integrity tag, so the RC4 split cannot be applied to it. For AES, Kerbrute uses salt information in the AS-REP when available. Otherwise it derives the default salt from the realm and client principal. Hashcat's AES modes assume the standard 4096 string-to-key iterations; Kerbrute rejects responses that specify different parameters. Unsupported etypes, malformed or truncated ciphertext, and AES fields that cannot be represented in hashcat format produce an export error and no hash. The account discovery is still reported. See [RFC 4757](https://www.rfc-editor.org/rfc/rfc4757) for RC4-HMAC, [RFC 3962](https://www.rfc-editor.org/rfc/rfc3962) for AES encryption, and [RFC 4120](https://www.rfc-editor.org/rfc/rfc4120) for Kerberos salt information.
+
 ```
 root@kali:~# ./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt
 
